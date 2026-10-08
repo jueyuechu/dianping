@@ -1,0 +1,58 @@
+# 中间件编排：MySQL 8 + Redis 7 + MinIO + RabbitMQ 3.13
+# 用法：docker compose up -d
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: dianping-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: "123456"
+      MYSQL_DATABASE: dianping
+      TZ: Asia/Shanghai
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_general_ci
+    ports:
+      - "3306:3306"
+    volumes:
+      - dianping-mysql-data:/var/lib/mysql
+      - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro   # 首次启动自动建表
+
+  redis:
+    image: redis:7
+    container_name: dianping-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - dianping-redis-data:/data
+
+  minio:
+    image: minio/minio:latest
+    container_name: dianping-minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: admin
+      MINIO_ROOT_PASSWORD: admin123456
+    ports:
+      - "9000:9000"    # S3 API
+      - "9001:9001"    # 控制台
+    volumes:
+      - dianping-minio-data:/data
+
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    container_name: dianping-rabbitmq
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    ports:
+      - "5672:5672"    # AMQP
+      - "15672:15672"  # 管理后台
+
+volumes:
+  dianping-mysql-data:
+  dianping-redis-data:
+  dianping-minio-data:

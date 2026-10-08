@@ -1,0 +1,34 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/dianping?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
+    username: root
+    password: "123456"
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      database: 0
+
+dianping:
+  jwt:
+    # HS256 密钥要求至少 32 字节
+    user-secret-key: dianping-user-jwt-secret-key-2026-0123456789ab
+    user-ttl: 604800000      # 7 天（毫秒）
+    admin-secret-key: dianping-admin-jwt-secret-key-2026-0123456789ab
+    admin-ttl: 7200000       # 2 小时
+    merchant-secret-key: dianping-merchant-jwt-secret-key-2026-0123456789ab
+    merchant-ttl: 7200000    # 2 小时
+  # MinIO 对象存储（Phase 1 接入）
+  minio:
+    endpoint: http://localhost:9000
+    access-key: admin
+    secret-key: admin123456
+    bucket: dianping
+  # 高德地图 Web 服务（Phase 1 接入，附近商家距离计算）
+  amap:
+    key: your-amap-web-service-key
+  # 微信小程序（Phase 1 接入，code 换 openid / 微信支付 V3）
+  wechat:
+    appid: your-wechat-appid
+    secret: your-wechat-secret
