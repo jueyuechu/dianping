@@ -1,0 +1,44 @@
+# ================= 构建产物 =================
+target/
+build/
+out/
+*.class
+*.jar
+*.war
+*.ear
+
+# ================= Maven =================
+.mvn/wrapper/maven-wrapper.jar
+dependency-reduced-pom.xml
+
+# ================= IDE / 编辑器 =================
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+.settings/
+.classpath
+.project
+.factorypath
+.apt_generated/
+.springBeans
+.sts4-cache/
+
+# ================= 日志 / 临时文件 =================
+*.log
+logs/
+*.tmp
+*.bak
+*.swp
+hs_err_pid*
+
+# ================= 本地敏感配置（按需放开） =================
+# 正式环境配置与本地个人配置不提交，避免泄露真实密码/密钥
+application-local.yml
+application-prod.yml
+
+# ================= 操作系统 =================
+.DS_Store
+Thumbs.db
+desktop.ini
