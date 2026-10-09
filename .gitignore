@@ -1,8 +1,13 @@
-# ================= 只跟踪后端 dianping-platform =================
-# 忽略根目录下所有内容，再白名单放行后端目录
+# ================= 只跟踪后端与前端工程 =================
+# 忽略根目录下所有内容，再白名单放行代码目录
 /*
 !/.gitignore
 !/dianping-platform/
+!/dianping-admin/
+
+# ================= 前端：依赖与构建产物 =================
+dianping-admin/node_modules/
+dianping-admin/dist/
 
 # ================= 后端：构建产物 =================
 dianping-platform/**/target/

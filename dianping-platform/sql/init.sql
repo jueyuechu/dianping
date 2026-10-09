@@ -1,12 +1,18 @@
 -- =====================================================================
--- 本地生活点评平台（dianping++）建表脚本
+-- 本地生活点评平台（dianping++）完整建表脚本
 -- 对齐《数据库ER图设计.md》：tb_ 前缀、InnoDB、utf8mb4、
 -- 评分乘 10 存整数、金额 decimal(10,2)、逻辑删除 deleted tinyint(1)
--- 本脚本为 P0 核心表（26 张）；社区域（tb_blog 等 3 张）与其余扩充表 P1/P2 补全
+-- 共 48 张表（11 大领域）：
+--   用户域 4 | 管理员域 6 | 商户域 5 | 菜品域 4 | 团购域 4
+--   评价域 5 | 互动域 5 | 社区域 3 | 审核域 4 | 交易域 3 | 运营域 5
+-- 注：tb_admin_role / tb_role_permission 为 RBAC 关联表（ER 文档隐含）
 -- =====================================================================
 
 CREATE DATABASE IF NOT EXISTS `dianping` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 USE `dianping`;
+
+-- 确保客户端连接使用 utf8mb4，避免中文种子数据乱码（Windows 下 mysql 客户端默认可能为 gbk）
+SET NAMES utf8mb4;
 
 -- ---------------------------------------------------------------------
 -- 1. 用户域
@@ -29,6 +35,26 @@ CREATE TABLE `tb_user` (
   UNIQUE KEY `uk_phone` (`phone`),
   UNIQUE KEY `uk_openid` (`openid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户表';
+
+-- 用户资料表（1 对 1 扩展）
+DROP TABLE IF EXISTS `tb_user_profile`;
+CREATE TABLE `tb_user_profile` (
+  `id`           BIGINT      NOT NULL AUTO_INCREMENT COMMENT '主键',
+  `user_id`      BIGINT      NOT NULL COMMENT '用户 id',
+  `gender`       TINYINT     DEFAULT NULL COMMENT '性别：0 未知 1 男 2 女',
+  `birthday`     DATE        DEFAULT NULL COMMENT '生日',
+  `city`         VARCHAR(32) DEFAULT NULL COMMENT '城市',
+  `intro`        VARCHAR(255) DEFAULT NULL COMMENT '简介',
+  `fans_count`   INT         NOT NULL DEFAULT 0 COMMENT '粉丝数',
+  `follow_count` INT         NOT NULL DEFAULT 0 COMMENT '关注数',
+  `points`       INT         NOT NULL DEFAULT 0 COMMENT '积分',
+  `level`        TINYINT     NOT NULL DEFAULT 1 COMMENT '会员等级',
+  `create_time`  TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time`  TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `deleted`      TINYINT(1)  NOT NULL DEFAULT 0 COMMENT '逻辑删除',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_profile_user` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户资料表';
 
 -- 用户登录设备表（设备/IP 关联封禁）
 DROP TABLE IF EXISTS `tb_user_device`;
@@ -129,6 +155,21 @@ CREATE TABLE `tb_role_permission` (
   UNIQUE KEY `uk_role_permission` (`role_id`, `permission_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='角色-权限关联表';
 
+-- 管理员操作日志表（审计留痕）
+DROP TABLE IF EXISTS `tb_admin_log`;
+CREATE TABLE `tb_admin_log` (
+  `id`          BIGINT       NOT NULL AUTO_INCREMENT COMMENT '主键',
+  `admin_id`    BIGINT       NOT NULL COMMENT '管理员 id',
+  `module`      VARCHAR(64)  DEFAULT NULL COMMENT '模块',
+  `action`      VARCHAR(128) DEFAULT NULL COMMENT '操作',
+  `detail`      TEXT         COMMENT '详情',
+  `ip`          VARCHAR(45)  DEFAULT NULL COMMENT 'IP',
+  `create_time` TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '操作时间',
+  PRIMARY KEY (`id`),
+  KEY `idx_alog_admin` (`admin_id`),
+  KEY `idx_alog_time` (`create_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='管理员操作日志表';
+
 -- ---------------------------------------------------------------------
 -- 3. 商户域
 -- ---------------------------------------------------------------------
@@ -141,7 +182,7 @@ CREATE TABLE `tb_merchant` (
   `license_no`    VARCHAR(64)  DEFAULT NULL COMMENT '营业执照号',
   `license_img`   VARCHAR(255) DEFAULT NULL COMMENT '营业执照照片',
   `legal_person`  VARCHAR(32)  DEFAULT NULL COMMENT '法人',
-  `contact_phone` VARCHAR(11)  DEFAULT NULL COMMENT '联系电话',
+  `contact_phone` VARCHAR(20)  DEFAULT NULL COMMENT '联系电话（手机或座机，含区号）',
   `status`        TINYINT      NOT NULL DEFAULT 0 COMMENT '状态：0 待审核 1 正常 2 冻结',
   `create_time`   TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `update_time`   TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
@@ -187,7 +228,7 @@ CREATE TABLE `tb_shop` (
   `service_score`  INT          NOT NULL DEFAULT 0 COMMENT '服务评分（乘10）',
   `value_score`    INT          NOT NULL DEFAULT 0 COMMENT '性价比评分（乘10）',
   `open_hours`     VARCHAR(32)  DEFAULT NULL COMMENT '营业时间',
-  `phone`          VARCHAR(11)  DEFAULT NULL COMMENT '电话',
+  `phone`          VARCHAR(20)  DEFAULT NULL COMMENT '电话（手机或座机，含区号）',
   `status`         TINYINT      NOT NULL DEFAULT 1 COMMENT '营业状态：1 营业 0 休息',
   `create_time`    TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `update_time`    TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
@@ -213,6 +254,21 @@ CREATE TABLE `tb_shop_location` (
   PRIMARY KEY (`id`),
   KEY `idx_loc_shop` (`shop_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='店铺位置表';
+
+-- 店铺审核表（位置/照片等修改审核快照）
+DROP TABLE IF EXISTS `tb_shop_audit`;
+CREATE TABLE `tb_shop_audit` (
+  `id`          BIGINT       NOT NULL AUTO_INCREMENT COMMENT '主键',
+  `shop_id`     BIGINT       NOT NULL COMMENT '店铺 id',
+  `audit_type`  TINYINT      NOT NULL COMMENT '审核类型：1 位置修改 2 照片修改 3 信息修改',
+  `status`      TINYINT      NOT NULL DEFAULT 1 COMMENT '审核状态（对齐统一状态机）',
+  `reason`      VARCHAR(255) DEFAULT NULL COMMENT '驳回原因',
+  `snapshot`    TEXT         COMMENT '修改内容快照（JSON）',
+  `create_time` TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `deleted`     TINYINT(1)   NOT NULL DEFAULT 0 COMMENT '逻辑删除',
+  PRIMARY KEY (`id`),
+  KEY `idx_sa_shop` (`shop_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='店铺审核表';
 
 -- ---------------------------------------------------------------------
 -- 4. 菜品域
@@ -268,6 +324,21 @@ CREATE TABLE `tb_dish_sku` (
   PRIMARY KEY (`id`),
   KEY `idx_sku_dish` (`dish_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='菜品规格表';
+
+-- 菜品审核表（新增/修改审核快照）
+DROP TABLE IF EXISTS `tb_dish_audit`;
+CREATE TABLE `tb_dish_audit` (
+  `id`          BIGINT       NOT NULL AUTO_INCREMENT COMMENT '主键',
+  `dish_id`     BIGINT       NOT NULL COMMENT '菜品 id',
+  `audit_type`  TINYINT      NOT NULL COMMENT '审核类型：1 新增 2 修改',
+  `status`      TINYINT      NOT NULL DEFAULT 1 COMMENT '审核状态（对齐统一状态机）',
+  `reason`      VARCHAR(255) DEFAULT NULL COMMENT '驳回原因',
+  `snapshot`    TEXT         COMMENT '修改内容快照（JSON）',
+  `create_time` TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `deleted`     TINYINT(1)   NOT NULL DEFAULT 0 COMMENT '逻辑删除',
+  PRIMARY KEY (`id`),
+  KEY `idx_da_dish` (`dish_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='菜品审核表';
 
 -- ---------------------------------------------------------------------
 -- 5. 团购域
@@ -394,8 +465,172 @@ CREATE TABLE `tb_review_image` (
   KEY `idx_ri_review` (`review_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='评价图片表';
 
+-- 评价回复表（商家回复/用户回复）
+DROP TABLE IF EXISTS `tb_review_reply`;
+CREATE TABLE `tb_review_reply` (
+  `id`          BIGINT       NOT NULL AUTO_INCREMENT COMMENT '主键',
+  `review_id`   BIGINT       NOT NULL COMMENT '评价 id',
+  `user_id`     BIGINT       NOT NULL COMMENT '回复人 id（商户账号或用户）',
+  `content`     VARCHAR(255) NOT NULL COMMENT '内容',
+  `type`        TINYINT      NOT NULL DEFAULT 1 COMMENT '类型：1 商家回复 2 用户回复',
+  `create_time` TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `deleted`     TINYINT(1)   NOT NULL DEFAULT 0 COMMENT '逻辑删除',
+  PRIMARY KEY (`id`),
+  KEY `idx_rr_review` (`review_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='评价回复表';
+
+-- 评价点赞表
+DROP TABLE IF EXISTS `tb_review_like`;
+CREATE TABLE `tb_review_like` (
+  `id`          BIGINT     NOT NULL AUTO_INCREMENT COMMENT '主键',
+  `review_id`   BIGINT     NOT NULL COMMENT '评价 id',
+  `user_id`     BIGINT     NOT NULL COMMENT '用户 id',
+  `create_time` TIMESTAMP  NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_review_like` (`review_id`, `user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='评价点赞表';
+
+-- 评价举报表
+DROP TABLE IF EXISTS `tb_review_report`;
+CREATE TABLE `tb_review_report` (
+  `id`          BIGINT       NOT NULL AUTO_INCREMENT COMMENT '主键',
+  `review_id`   BIGINT       NOT NULL COMMENT '评价 id',
+  `user_id`     BIGINT       NOT NULL COMMENT '举报人 id',
+  `reason`      VARCHAR(255) DEFAULT NULL COMMENT '举报原因',
+  `status`      TINYINT      NOT NULL DEFAULT 0 COMMENT '处理状态：0 待处理 1 已处理',
+  `create_time` TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `deleted`     TINYINT(1)   NOT NULL DEFAULT 0 COMMENT '逻辑删除',
+  PRIMARY KEY (`id`),
+  KEY `idx_rrp_review` (`review_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='评价举报表';
+
 -- ---------------------------------------------------------------------
--- 7. 审核域（统一审核中心，对齐《审核状态机详细设计.md》）
+-- 7. 互动域
+-- ---------------------------------------------------------------------
+
+-- 评论表（评价/问答等对象的通用评论）
+DROP TABLE IF EXISTS `tb_comment`;
+CREATE TABLE `tb_comment` (
+  `id`          BIGINT       NOT NULL AUTO_INCREMENT COMMENT '主键',
+  `user_id`     BIGINT       NOT NULL COMMENT '用户 id',
+  `target_type` TINYINT      NOT NULL COMMENT '评论对象：1 评价 2 问答',
+  `target_id`   BIGINT       NOT NULL COMMENT '对象 id',
+  `content`     VARCHAR(255) NOT NULL COMMENT '内容',
+  `status`      TINYINT      NOT NULL DEFAULT 1 COMMENT '状态：1 正常 0 删除 2 隐藏',
+  `create_time` TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `deleted`     TINYINT(1)   NOT NULL DEFAULT 0 COMMENT '逻辑删除',
+  PRIMARY KEY (`id`),
+  KEY `idx_c_target` (`target_type`, `target_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='评论表';
+
+-- 点赞表（通用对象点赞）
+DROP TABLE IF EXISTS `tb_like`;
+CREATE TABLE `tb_like` (
+  `id`          BIGINT     NOT NULL AUTO_INCREMENT COMMENT '主键',
+  `user_id`     BIGINT     NOT NULL COMMENT '用户 id',
+  `target_type` TINYINT    NOT NULL COMMENT '对象类型：1 评价 2 帖子 3 评论',
+  `target_id`   BIGINT     NOT NULL COMMENT '对象 id',
+  `create_time` TIMESTAMP  NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_like` (`user_id`, `target_type`, `target_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='点赞表';
+
+-- 收藏表
+DROP TABLE IF EXISTS `tb_collect`;
+CREATE TABLE `tb_collect` (
+  `id`          BIGINT     NOT NULL AUTO_INCREMENT COMMENT '主键',
+  `user_id`     BIGINT     NOT NULL COMMENT '用户 id',
+  `target_type` TINYINT    NOT NULL COMMENT '对象类型：1 商家 2 菜品 3 团购 4 帖子',
+  `target_id`   BIGINT     NOT NULL COMMENT '对象 id',
+  `create_time` TIMESTAMP  NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_collect` (`user_id`, `target_type`, `target_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='收藏表';
+
+-- 关注表
+DROP TABLE IF EXISTS `tb_follow`;
+CREATE TABLE `tb_follow` (
+  `id`             BIGINT     NOT NULL AUTO_INCREMENT COMMENT '主键',
+  `user_id`        BIGINT     NOT NULL COMMENT '关注者 id',
+  `follow_user_id` BIGINT     NOT NULL COMMENT '被关注者 id',
+  `create_time`    TIMESTAMP  NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_follow` (`user_id`, `follow_user_id`),
+  KEY `idx_follow_target` (`follow_user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='关注表';
+
+-- 消息表（站内信）
+DROP TABLE IF EXISTS `tb_message`;
+CREATE TABLE `tb_message` (
+  `id`          BIGINT       NOT NULL AUTO_INCREMENT COMMENT '主键',
+  `user_id`     BIGINT       NOT NULL COMMENT '接收用户 id',
+  `type`        TINYINT      NOT NULL DEFAULT 1 COMMENT '类型：1 系统 2 商家回复 3 评论 4 订阅',
+  `content`     VARCHAR(255) DEFAULT NULL COMMENT '内容',
+  `is_read`     TINYINT      NOT NULL DEFAULT 0 COMMENT '是否已读',
+  `create_time` TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `deleted`     TINYINT(1)   NOT NULL DEFAULT 0 COMMENT '逻辑删除',
+  PRIMARY KEY (`id`),
+  KEY `idx_msg_user` (`user_id`, `is_read`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='消息表';
+
+-- ---------------------------------------------------------------------
+-- 8. 社区域（发帖：探店笔记 + 自由动态，P1）
+-- ---------------------------------------------------------------------
+
+-- 帖子表（shop_id 可空：探店笔记必填，自由动态为 NULL）
+DROP TABLE IF EXISTS `tb_blog`;
+CREATE TABLE `tb_blog` (
+  `id`          BIGINT        NOT NULL AUTO_INCREMENT COMMENT '主键',
+  `user_id`     BIGINT        NOT NULL COMMENT '作者 id',
+  `shop_id`     BIGINT        DEFAULT NULL COMMENT '关联店铺（探店笔记必填）',
+  `type`        TINYINT       NOT NULL DEFAULT 1 COMMENT '类型：1 探店笔记 2 自由动态',
+  `title`       VARCHAR(128)  DEFAULT NULL COMMENT '标题（可空）',
+  `content`     TEXT          COMMENT '正文',
+  `images`      VARCHAR(2048) DEFAULT NULL COMMENT '图片/视频 URL，逗号分隔',
+  `location`    VARCHAR(64)   DEFAULT NULL COMMENT '定位（城市/商圈）',
+  `status`      TINYINT       NOT NULL DEFAULT 0 COMMENT '状态：0 正常 1 隐藏（敏感词/审核） 2 删除',
+  `liked`       INT           NOT NULL DEFAULT 0 COMMENT '点赞数（冗余）',
+  `comments`    INT           NOT NULL DEFAULT 0 COMMENT '评论数（冗余）',
+  `collected`   INT           NOT NULL DEFAULT 0 COMMENT '收藏数（冗余）',
+  `create_time` TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `deleted`     TINYINT(1)    NOT NULL DEFAULT 0 COMMENT '逻辑删除',
+  PRIMARY KEY (`id`),
+  KEY `idx_blog_user` (`user_id`),
+  KEY `idx_blog_shop` (`shop_id`),
+  KEY `idx_blog_time` (`create_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='帖子表';
+
+-- 帖子评论表（楼中楼）
+DROP TABLE IF EXISTS `tb_blog_comment`;
+CREATE TABLE `tb_blog_comment` (
+  `id`          BIGINT       NOT NULL AUTO_INCREMENT COMMENT '主键',
+  `blog_id`     BIGINT       NOT NULL COMMENT '帖子 id',
+  `user_id`     BIGINT       NOT NULL COMMENT '评论人 id',
+  `parent_id`   BIGINT       DEFAULT NULL COMMENT '顶级评论 id（楼中楼，顶评为 NULL）',
+  `answer_id`   BIGINT       DEFAULT NULL COMMENT '回复目标用户 id（@ 某人）',
+  `content`     VARCHAR(255) NOT NULL COMMENT '内容',
+  `status`      TINYINT      NOT NULL DEFAULT 0 COMMENT '状态：0 正常 1 删除 2 隐藏',
+  `create_time` TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '评论时间',
+  `deleted`     TINYINT(1)   NOT NULL DEFAULT 0 COMMENT '逻辑删除',
+  PRIMARY KEY (`id`),
+  KEY `idx_bc_blog` (`blog_id`),
+  KEY `idx_bc_parent` (`parent_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='帖子评论表';
+
+-- 帖子点赞表
+DROP TABLE IF EXISTS `tb_blog_like`;
+CREATE TABLE `tb_blog_like` (
+  `id`          BIGINT     NOT NULL AUTO_INCREMENT COMMENT '主键',
+  `blog_id`     BIGINT     NOT NULL COMMENT '帖子 id',
+  `user_id`     BIGINT     NOT NULL COMMENT '用户 id',
+  `create_time` TIMESTAMP  NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_blog_like` (`blog_id`, `user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='帖子点赞表';
+
+-- ---------------------------------------------------------------------
+-- 9. 审核域（统一审核中心，对齐《审核状态机详细设计.md》）
 -- ---------------------------------------------------------------------
 
 -- 审核任务表
@@ -446,8 +681,20 @@ CREATE TABLE `tb_report` (
   KEY `idx_rp_target` (`target_type`, `target_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='举报表';
 
+-- 敏感词表
+DROP TABLE IF EXISTS `tb_sensitive_word`;
+CREATE TABLE `tb_sensitive_word` (
+  `id`          BIGINT      NOT NULL AUTO_INCREMENT COMMENT '主键',
+  `word`        VARCHAR(64) NOT NULL COMMENT '敏感词',
+  `level`       TINYINT     NOT NULL DEFAULT 1 COMMENT '等级：1 低危（打码） 2 中危（人工复审） 3 高危（拦截）',
+  `create_time` TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `deleted`     TINYINT(1)  NOT NULL DEFAULT 0 COMMENT '逻辑删除',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_word` (`word`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='敏感词表';
+
 -- ---------------------------------------------------------------------
--- 8. 交易域
+-- 10. 交易域
 -- ---------------------------------------------------------------------
 
 -- 支付表
@@ -466,8 +713,41 @@ CREATE TABLE `tb_payment` (
   KEY `idx_pay_order` (`order_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='支付表';
 
+-- 退款表
+DROP TABLE IF EXISTS `tb_refund`;
+CREATE TABLE `tb_refund` (
+  `id`           BIGINT         NOT NULL AUTO_INCREMENT COMMENT '主键',
+  `order_id`     BIGINT         NOT NULL COMMENT '订单 id',
+  `refund_no`    VARCHAR(64)    DEFAULT NULL COMMENT '退款单号',
+  `amount`       DECIMAL(10,2)  NOT NULL COMMENT '退款金额',
+  `reason`       VARCHAR(255)   DEFAULT NULL COMMENT '退款原因',
+  `status`       TINYINT        NOT NULL DEFAULT 1 COMMENT '状态：1 申请 2 审核 3 退款中 4 已退 5 驳回',
+  `apply_time`   TIMESTAMP      NULL DEFAULT NULL COMMENT '申请时间',
+  `refund_time`  TIMESTAMP      NULL DEFAULT NULL COMMENT '退款完成时间',
+  `create_time`  TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `deleted`      TINYINT(1)     NOT NULL DEFAULT 0 COMMENT '逻辑删除',
+  PRIMARY KEY (`id`),
+  KEY `idx_rf_order` (`order_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='退款表';
+
+-- 结算表（商户结算 + 平台抽佣）
+DROP TABLE IF EXISTS `tb_settlement`;
+CREATE TABLE `tb_settlement` (
+  `id`            BIGINT         NOT NULL AUTO_INCREMENT COMMENT '主键',
+  `merchant_id`   BIGINT         NOT NULL COMMENT '商户 id',
+  `order_id`      BIGINT         DEFAULT NULL COMMENT '订单 id',
+  `amount`        DECIMAL(10,2)  NOT NULL COMMENT '结算金额',
+  `commission`    DECIMAL(10,2)  NOT NULL DEFAULT 0.00 COMMENT '平台抽佣',
+  `status`        TINYINT        NOT NULL DEFAULT 1 COMMENT '状态：1 待结算 2 已结算 3 已提现',
+  `settle_time`   TIMESTAMP      NULL DEFAULT NULL COMMENT '结算时间',
+  `create_time`   TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `deleted`       TINYINT(1)     NOT NULL DEFAULT 0 COMMENT '逻辑删除',
+  PRIMARY KEY (`id`),
+  KEY `idx_st_merchant` (`merchant_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='结算表';
+
 -- ---------------------------------------------------------------------
--- 9. 运营域
+-- 11. 运营域
 -- ---------------------------------------------------------------------
 
 -- 分类表（一级/二级；店铺品类 type_id 亦引用）
@@ -483,6 +763,66 @@ CREATE TABLE `tb_category` (
   PRIMARY KEY (`id`),
   KEY `idx_cat_parent` (`parent_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='分类表';
+
+-- 标签表（口味/环境/服务标签）
+DROP TABLE IF EXISTS `tb_tag`;
+CREATE TABLE `tb_tag` (
+  `id`          BIGINT      NOT NULL AUTO_INCREMENT COMMENT '主键',
+  `name`        VARCHAR(32) NOT NULL COMMENT '标签名：分量足/服务好/排队久',
+  `type`        TINYINT     NOT NULL DEFAULT 1 COMMENT '类型：1 口味 2 环境 3 服务 4 通用',
+  `sort`        INT         NOT NULL DEFAULT 0 COMMENT '排序',
+  `create_time` TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `deleted`     TINYINT(1)  NOT NULL DEFAULT 0 COMMENT '逻辑删除',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='标签表';
+
+-- Banner 表（运营位）
+DROP TABLE IF EXISTS `tb_banner`;
+CREATE TABLE `tb_banner` (
+  `id`          BIGINT       NOT NULL AUTO_INCREMENT COMMENT '主键',
+  `image`       VARCHAR(255) NOT NULL COMMENT '图片',
+  `link_type`   TINYINT      DEFAULT NULL COMMENT '跳转类型：1 店铺 2 团购 3 专题 4 外链',
+  `link_id`     BIGINT       DEFAULT NULL COMMENT '跳转对象 id（外链时为 NULL，link_url 存 ext）',
+  `link_url`    VARCHAR(255) DEFAULT NULL COMMENT '外链地址',
+  `sort`        INT          NOT NULL DEFAULT 0 COMMENT '排序',
+  `status`      TINYINT      NOT NULL DEFAULT 1 COMMENT '状态：1 启用 0 停用',
+  `create_time` TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `deleted`     TINYINT(1)   NOT NULL DEFAULT 0 COMMENT '逻辑删除',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Banner 表';
+
+-- 优惠券表
+DROP TABLE IF EXISTS `tb_coupon`;
+CREATE TABLE `tb_coupon` (
+  `id`          BIGINT         NOT NULL AUTO_INCREMENT COMMENT '主键',
+  `shop_id`     BIGINT         DEFAULT NULL COMMENT '店铺 id（平台券为 NULL）',
+  `name`        VARCHAR(64)    DEFAULT NULL COMMENT '券名',
+  `face_value`  DECIMAL(10,2)  NOT NULL COMMENT '面额',
+  `threshold`   DECIMAL(10,2)  NOT NULL DEFAULT 0.00 COMMENT '使用门槛',
+  `valid_start` TIMESTAMP      NULL DEFAULT NULL COMMENT '有效期开始',
+  `valid_end`   TIMESTAMP      NULL DEFAULT NULL COMMENT '有效期结束',
+  `total`       INT            NOT NULL DEFAULT 0 COMMENT '发放总量',
+  `received`    INT            NOT NULL DEFAULT 0 COMMENT '已领取数',
+  `status`      TINYINT        NOT NULL DEFAULT 1 COMMENT '状态：1 启用 0 停用',
+  `create_time` TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `deleted`     TINYINT(1)     NOT NULL DEFAULT 0 COMMENT '逻辑删除',
+  PRIMARY KEY (`id`),
+  KEY `idx_cp_shop` (`shop_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='优惠券表';
+
+-- 活动表
+DROP TABLE IF EXISTS `tb_activity`;
+CREATE TABLE `tb_activity` (
+  `id`          BIGINT      NOT NULL AUTO_INCREMENT COMMENT '主键',
+  `name`        VARCHAR(64) NOT NULL COMMENT '活动名',
+  `type`        TINYINT     NOT NULL DEFAULT 1 COMMENT '类型：1 专题 2 新客立减 3 报名',
+  `start_time`  TIMESTAMP   NULL DEFAULT NULL COMMENT '开始时间',
+  `end_time`    TIMESTAMP   NULL DEFAULT NULL COMMENT '结束时间',
+  `status`      TINYINT     NOT NULL DEFAULT 1 COMMENT '状态：1 启用 0 停用',
+  `create_time` TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `deleted`     TINYINT(1)  NOT NULL DEFAULT 0 COMMENT '逻辑删除',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='活动表';
 
 -- =====================================================================
 -- 演示种子数据
@@ -510,6 +850,21 @@ INSERT INTO `tb_category` (`name`, `parent_id`, `sort`) VALUES
 ('烧烤', 1, 2),
 ('奶茶', 1, 3),
 ('酒店', 1, 4);
+
+-- 评价标签
+INSERT INTO `tb_tag` (`name`, `type`, `sort`) VALUES
+('分量足', 1, 1),
+('味道好', 1, 2),
+('环境好', 2, 3),
+('服务好', 3, 4),
+('性价比高', 4, 5),
+('排队久', 4, 6);
+
+-- 敏感词（演示）
+INSERT INTO `tb_sensitive_word` (`word`, `level`) VALUES
+('加微信', 2),
+('代购', 2),
+('违禁品', 3);
 
 -- 演示商户 + 员工账号 + 店铺
 INSERT INTO `tb_merchant` (`name`, `license_no`, `legal_person`, `contact_phone`, `status`) VALUES

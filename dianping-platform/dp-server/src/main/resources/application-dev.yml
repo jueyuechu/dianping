@@ -3,12 +3,13 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/dianping?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
     username: root
-    password: "123456"
+    password: "1234"
   data:
     redis:
       host: localhost
       port: 6379
-      database: 0
+      database: 6
+      password: 1234
 
 dianping:
   jwt:
@@ -22,12 +23,14 @@ dianping:
   # MinIO 对象存储（Phase 1 接入）
   minio:
     endpoint: http://localhost:9000
-    access-key: admin
-    secret-key: admin123456
+    access-key: minioadmin
+    secret-key: minioadmin
     bucket: dianping
+    url-prefix: /minio
+
   # 高德地图 Web 服务（Phase 1 接入，附近商家距离计算）
   amap:
-    key: your-amap-web-service-key
+    key: 50b6775c9db2ccb5abc37ff02c8769fc
   # 微信小程序（Phase 1 接入，code 换 openid / 微信支付 V3）
   wechat:
     appid: your-wechat-appid

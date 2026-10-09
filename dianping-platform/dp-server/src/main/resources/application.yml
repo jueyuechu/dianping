@@ -6,7 +6,7 @@ spring:
     name: dianping-server
   profiles:
     active: dev
-  jackson:
+  Jackson:
     time-zone: GMT+8
     date-format: yyyy-MM-dd HH:mm:ss
 
