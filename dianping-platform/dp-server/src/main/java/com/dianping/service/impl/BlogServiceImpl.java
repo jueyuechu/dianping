@@ -98,9 +98,13 @@ public class BlogServiceImpl implements BlogService {
     }
 
     @Override
-    public Page<BlogVO> feed(String type, long current, long size) {
+    public Page<BlogVO> feed(String type, String keyword, long current, long size) {
         Page<Blog> page = new Page<>(current, size);
         LambdaQueryWrapper<Blog> wrapper = new LambdaQueryWrapper<Blog>().eq(Blog::getStatus, 0);
+        // 关键词搜索：标题或正文模糊匹配
+        if (keyword != null && !keyword.isBlank()) {
+            wrapper.and(w -> w.like(Blog::getContent, keyword).or().like(Blog::getTitle, keyword));
+        }
         if ("follow".equalsIgnoreCase(type)) {
             Long userId = BaseContext.getCurrentId();
             if (userId == null) {

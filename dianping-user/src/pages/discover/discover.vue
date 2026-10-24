@@ -3,6 +3,12 @@
     <view class="head">
       <text class="title">发现</text>
       <text class="sub">探店笔记 · 社区动态</text>
+      <view class="search">
+        <text class="search-ic">⌕</text>
+        <input class="search-input" v-model="keyword" placeholder="搜索笔记内容" confirm-type="search" @confirm="doSearch" />
+        <text v-if="keyword" class="search-clear" @click="clearSearch">✕</text>
+        <text class="search-btn" @click="doSearch">搜索</text>
+      </view>
     </view>
 
     <view class="tabs">
@@ -10,6 +16,8 @@
       <view class="tab" :class="{ on: type === 'latest' }" @click="switchType('latest')">最新</view>
       <view class="tab" :class="{ on: type === 'follow' }" @click="switchType('follow')">关注</view>
     </view>
+
+    <view class="result-tip" v-if="keyword">搜索「{{ keyword }}」的结果</view>
 
     <view class="card" v-for="b in blogs" :key="b.id" @click="goDetail(b.id)">
       <view class="author">
@@ -57,6 +65,7 @@ import { api } from '../../api'
 import { isLogin, requireLogin } from '../../utils/auth'
 
 const type = ref('recommend')
+const keyword = ref('')
 const blogs = ref([])
 const emptyText = ref('')
 
@@ -67,15 +76,28 @@ function fmt(t) {
 async function load() {
   emptyText.value = ''
   try {
-    const page = await api.blogFeed(type.value, 1, 20)
+    const page = await api.blogFeed(type.value, 1, 20, keyword.value.trim())
     blogs.value = page.records || []
     if (!blogs.value.length) {
-      emptyText.value = type.value === 'follow' ? '还没有关注的作者，去推荐流逛逛吧' : '还没有笔记，来发布第一篇吧'
+      if (keyword.value.trim()) {
+        emptyText.value = `没有找到「${keyword.value.trim()}」相关笔记`
+      } else {
+        emptyText.value = type.value === 'follow' ? '还没有关注的作者，去推荐流逛逛吧' : '还没有笔记，来发布第一篇吧'
+      }
     }
   } catch (e) {
     blogs.value = []
     emptyText.value = '加载失败'
   }
+}
+
+function doSearch() {
+  load()
+}
+
+function clearSearch() {
+  keyword.value = ''
+  load()
 }
 
 function switchType(t) {
@@ -112,6 +134,12 @@ onShow(load)
 .head { background: #FFD100; padding: 40rpx 32rpx; color: #222; }
 .title { font-size: 40rpx; font-weight: 700; display: block; }
 .sub { font-size: 24rpx; color: #6B4A00; margin-top: 8rpx; display: block; }
+.search { margin-top: 18rpx; height: 76rpx; background: #fff; border-radius: 38rpx; display: flex; align-items: center; padding: 0 10rpx 0 24rpx; }
+.search-ic { color: #bbb; font-size: 30rpx; }
+.search-input { flex: 1; font-size: 26rpx; margin-left: 8rpx; color: #333; }
+.search-clear { color: #bbb; font-size: 24rpx; padding: 0 12rpx; }
+.search-btn { background: #222; color: #FFD100; font-size: 24rpx; font-weight: 600; border-radius: 30rpx; padding: 10rpx 26rpx; }
+.result-tip { padding: 20rpx 32rpx 0; color: #888; font-size: 22rpx; }
 .tabs { display: flex; background: #fff; }
 .tab { flex: 1; text-align: center; padding: 22rpx 0; font-size: 28rpx; color: #666; }
 .tab.on { color: #222; font-weight: 600; border-bottom: 4rpx solid #FFC300; }

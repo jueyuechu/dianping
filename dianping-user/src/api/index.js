@@ -91,8 +91,8 @@ export const api = {
   // 登录
   login: code => request('/user/auth/login', { method: 'POST', data: { code, nickName: '微信用户' } }),
   // 社区
-  blogFeed: (type = 'recommend', current = 1, size = 10) =>
-    request(`/user/blog/feed?type=${type}&current=${current}&size=${size}`),
+  blogFeed: (type = 'recommend', current = 1, size = 10, keyword = '') =>
+    request(`/user/blog/feed?type=${type}&current=${current}&size=${size}${keyword ? `&keyword=${encodeURIComponent(keyword)}` : ''}`),
   blogDetail: id => request(`/user/blog/${id}`),
   blogComments: (id, current = 1, size = 20) =>
     request(`/user/blog/${id}/comments?current=${current}&size=${size}`),

@@ -26,13 +26,14 @@ public class BlogController {
     private BlogService blogService;
 
     /**
-     * 笔记流：type=recommend/latest/follow
+     * 笔记流：type=recommend/latest/follow，keyword 为搜索关键词
      */
     @GetMapping("/feed")
     public Result<Page<BlogVO>> feed(@RequestParam(defaultValue = "recommend") String type,
+                                     @RequestParam(required = false) String keyword,
                                      @RequestParam(defaultValue = "1") long current,
                                      @RequestParam(defaultValue = "10") long size) {
-        return Result.success(blogService.feed(type, current, size));
+        return Result.success(blogService.feed(type, keyword, current, size));
     }
 
     /**

@@ -24,9 +24,10 @@ public interface BlogService {
     /**
      * 笔记流
      *
-     * @param type recommend 推荐 / latest 最新 / follow 关注
+     * @param type    recommend 推荐 / latest 最新 / follow 关注
+     * @param keyword 搜索关键词（匹配标题/正文，可为空）
      */
-    Page<BlogVO> feed(String type, long current, long size);
+    Page<BlogVO> feed(String type, String keyword, long current, long size);
 
     /** 我的帖子 */
     Page<BlogVO> my(long current, long size);
