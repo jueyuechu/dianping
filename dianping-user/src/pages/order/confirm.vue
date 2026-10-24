@@ -86,7 +86,7 @@ async function submit() {
 .qty { width: 70rpx; text-align: center; font-size: 28rpx; }
 .bottom { position: fixed; left: 0; right: 0; bottom: 0; height: 120rpx; background: #fff; display: flex; align-items: center; justify-content: space-between; padding: 0 32rpx; box-shadow: 0 -4rpx 16rpx rgba(0,0,0,.06); }
 .total { font-size: 26rpx; color: #666; }
-.amount { color: #ff3b30; font-size: 40rpx; font-weight: 700; }
-.pay-btn { background: #ff6633; color: #fff; font-size: 30rpx; padding: 18rpx 56rpx; border-radius: 40rpx; }
+.amount { color: #FF4B14; font-size: 40rpx; font-weight: 700; }
+.pay-btn { background: #FFD100; color: #222; font-weight: 600; font-size: 30rpx; padding: 18rpx 56rpx; border-radius: 40rpx; }
 .pay-btn.disabled { opacity: .6; }
 </style>

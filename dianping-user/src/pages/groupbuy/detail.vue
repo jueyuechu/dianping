@@ -76,12 +76,12 @@ function buy() {
 
 <style scoped>
 .page { min-height: 100vh; background: #f5f6f8; padding-bottom: 140rpx; }
-.hero { background: linear-gradient(180deg, #ff6633, #ff8c5a); padding: 40rpx 32rpx; color: #fff; }
-.gb-name { font-size: 38rpx; font-weight: 700; }
+.hero { background: linear-gradient(160deg, #FFE07A, #FFD100); padding: 40rpx 32rpx; color: #222; }
+.gb-name { font-size: 38rpx; font-weight: 700; color: #222; }
 .price-row { margin-top: 20rpx; display: flex; align-items: baseline; }
-.price { font-size: 48rpx; font-weight: 700; }
-.orig { font-size: 24rpx; opacity: .8; margin-left: 16rpx; text-decoration: line-through; }
-.shop { display: block; margin-top: 16rpx; font-size: 24rpx; opacity: .9; }
+.price { font-size: 48rpx; font-weight: 700; color: #FF4B14; }
+.orig { font-size: 24rpx; color: #7A5600; margin-left: 16rpx; text-decoration: line-through; }
+.shop { display: block; margin-top: 16rpx; font-size: 24rpx; color: #6B4A00; }
 .card { margin: 20rpx 24rpx; background: #fff; border-radius: 20rpx; padding: 24rpx; }
 .card-title { font-size: 28rpx; font-weight: 600; display: block; margin-bottom: 16rpx; }
 .content { font-size: 26rpx; color: #555; line-height: 1.8; }
@@ -91,6 +91,6 @@ function buy() {
 .bottom { position: fixed; left: 0; right: 0; bottom: 0; height: 120rpx; background: #fff; display: flex; align-items: center; justify-content: space-between; padding: 0 32rpx; box-shadow: 0 -4rpx 16rpx rgba(0,0,0,.06); }
 .bottom-price { display: flex; align-items: baseline; }
 .label { font-size: 24rpx; color: #999; margin-right: 10rpx; }
-.bottom-price .price { color: #ff3b30; font-size: 40rpx; }
-.buy-btn { background: #ff6633; color: #fff; font-size: 30rpx; padding: 18rpx 64rpx; border-radius: 40rpx; }
+.bottom-price .price { color: #FF4B14; font-size: 40rpx; }
+.buy-btn { background: #FFD100; color: #222; font-weight: 600; font-size: 30rpx; padding: 18rpx 64rpx; border-radius: 40rpx; }
 </style>

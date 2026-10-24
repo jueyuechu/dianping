@@ -114,19 +114,19 @@ onLoad(options => {
 .page { min-height: 100vh; background: #f5f6f8; padding: 20rpx 0 160rpx; }
 .card { margin: 0 24rpx; background: #fff; border-radius: 20rpx; padding: 24rpx; }
 .author { display: flex; align-items: center; }
-.avatar { width: 76rpx; height: 76rpx; border-radius: 50%; background: linear-gradient(135deg, #ffb199, #ff6633); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 28rpx; }
+.avatar { width: 76rpx; height: 76rpx; border-radius: 50%; background: linear-gradient(135deg, #FFE08A, #FFC300); color: #6B4A00; font-weight: 600; display: flex; align-items: center; justify-content: center; font-size: 28rpx; }
 .author-info { margin-left: 16rpx; }
 .author-name { font-size: 28rpx; font-weight: 600; display: block; }
 .time { font-size: 20rpx; color: #bbb; }
 .content { display: block; margin-top: 20rpx; font-size: 30rpx; color: #333; line-height: 1.75; }
 .imgs { margin-top: 16rpx; }
 .img { width: 100%; border-radius: 12rpx; margin-bottom: 12rpx; }
-.shop-chip, .loc-chip { display: inline-block; margin-top: 16rpx; background: #fff4ee; border: 1rpx solid #ffd9c7; color: #ff6633; font-size: 22rpx; border-radius: 26rpx; padding: 8rpx 20rpx; }
+.shop-chip, .loc-chip { display: inline-block; margin-top: 16rpx; background: #FFF6D9; border: 1rpx solid #FFE08A; color: #B07A00; font-size: 22rpx; border-radius: 26rpx; padding: 8rpx 20rpx; }
 .stats { margin-top: 18rpx; display: flex; font-size: 22rpx; color: #999; }
 .stats text { margin-right: 30rpx; }
 .section { padding: 30rpx 32rpx 12rpx; font-size: 28rpx; font-weight: 600; }
 .comment { display: flex; margin: 0 24rpx 18rpx; }
-.c-avatar { width: 60rpx; height: 60rpx; border-radius: 50%; background: #ffd9c7; color: #ff6633; display: flex; align-items: center; justify-content: center; font-size: 22rpx; flex-shrink: 0; }
+.c-avatar { width: 60rpx; height: 60rpx; border-radius: 50%; background: #FFF4CE; color: #B07A00; display: flex; align-items: center; justify-content: center; font-size: 22rpx; flex-shrink: 0; }
 .c-body { margin-left: 16rpx; display: flex; flex-direction: column; }
 .c-name { font-size: 22rpx; color: #999; }
 .c-text { font-size: 26rpx; color: #333; margin-top: 6rpx; line-height: 1.6; }
@@ -136,5 +136,5 @@ onLoad(options => {
 .bar-act { font-size: 24rpx; color: #666; margin-right: 20rpx; }
 .bar-act.liked { color: #ff3b30; }
 .bar-input { flex: 1; height: 68rpx; background: #f4f5f7; border-radius: 34rpx; padding: 0 24rpx; font-size: 24rpx; }
-.bar-btn { margin-left: 14rpx; background: #ff6633; color: #fff; font-size: 24rpx; border-radius: 34rpx; padding: 0 28rpx; height: 68rpx; line-height: 68rpx; }
+.bar-btn { margin-left: 14rpx; background: #FFD100; color: #222; font-weight: 600; font-size: 24rpx; border-radius: 34rpx; padding: 0 28rpx; height: 68rpx; line-height: 68rpx; }
 </style>

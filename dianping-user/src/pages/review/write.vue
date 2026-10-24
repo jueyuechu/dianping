@@ -124,13 +124,13 @@ async function submit() {
 .textarea { margin: 20rpx 24rpx; width: auto; height: 240rpx; background: #fff; border-radius: 20rpx; padding: 24rpx; font-size: 28rpx; box-sizing: border-box; }
 .tags { display: flex; flex-wrap: wrap; padding: 0 24rpx; }
 .tag { font-size: 24rpx; color: #666; border: 1rpx solid #ddd; border-radius: 24rpx; padding: 10rpx 24rpx; margin: 0 16rpx 16rpx 0; }
-.tag.on { color: #fff; background: #ff6633; border-color: #ff6633; }
+.tag.on { color: #222; background: #FFD100; border-color: #FFC300; }
 .uploader { display: flex; flex-wrap: wrap; padding: 0 24rpx; }
 .img-box { position: relative; width: 160rpx; height: 160rpx; margin: 0 16rpx 16rpx 0; }
 .img { width: 160rpx; height: 160rpx; border-radius: 12rpx; }
 .del { position: absolute; top: -10rpx; right: -10rpx; width: 36rpx; height: 36rpx; border-radius: 50%; background: rgba(0,0,0,.6); color: #fff; font-size: 24rpx; display: flex; align-items: center; justify-content: center; }
 .add { width: 160rpx; height: 160rpx; border: 1rpx dashed #ccc; border-radius: 12rpx; color: #999; font-size: 24rpx; display: flex; align-items: center; justify-content: center; }
-.submit { margin: 30rpx 24rpx 0; background: #ff6633; color: #fff; text-align: center; padding: 24rpx 0; border-radius: 44rpx; font-size: 30rpx; }
+.submit { margin: 30rpx 24rpx 0; background: #FFD100; color: #222; font-weight: 600; text-align: center; padding: 24rpx 0; border-radius: 44rpx; font-size: 30rpx; }
 .submit.disabled { opacity: .6; }
 .note { display: block; text-align: center; color: #bbb; font-size: 22rpx; margin-top: 20rpx; }
 </style>

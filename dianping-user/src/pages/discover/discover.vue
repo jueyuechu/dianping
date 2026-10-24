@@ -109,28 +109,28 @@ onShow(load)
 
 <style scoped>
 .page { min-height: 100vh; background: #f5f6f8; padding-bottom: 120rpx; }
-.head { background: linear-gradient(135deg, #ff6633, #ff8c5a); padding: 40rpx 32rpx; color: #fff; }
+.head { background: #FFD100; padding: 40rpx 32rpx; color: #222; }
 .title { font-size: 40rpx; font-weight: 700; display: block; }
-.sub { font-size: 24rpx; opacity: .9; margin-top: 8rpx; display: block; }
+.sub { font-size: 24rpx; color: #6B4A00; margin-top: 8rpx; display: block; }
 .tabs { display: flex; background: #fff; }
 .tab { flex: 1; text-align: center; padding: 22rpx 0; font-size: 28rpx; color: #666; }
-.tab.on { color: #ff6633; font-weight: 600; border-bottom: 4rpx solid #ff6633; }
+.tab.on { color: #222; font-weight: 600; border-bottom: 4rpx solid #FFC300; }
 .card { margin: 20rpx 24rpx 0; background: #fff; border-radius: 20rpx; padding: 24rpx; }
 .author { display: flex; align-items: center; }
-.avatar { width: 68rpx; height: 68rpx; border-radius: 50%; background: linear-gradient(135deg, #ffb199, #ff6633); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 26rpx; }
+.avatar { width: 68rpx; height: 68rpx; border-radius: 50%; background: linear-gradient(135deg, #FFE08A, #FFC300); color: #6B4A00; display: flex; align-items: center; justify-content: center; font-size: 26rpx; font-weight: 600; }
 .author-info { margin-left: 16rpx; flex: 1; }
 .author-name { font-size: 26rpx; font-weight: 600; display: block; }
 .time { font-size: 20rpx; color: #bbb; }
-.type-tag { font-size: 20rpx; color: #ff6633; background: #fff4ee; border-radius: 8rpx; padding: 4rpx 12rpx; }
+.type-tag { font-size: 20rpx; color: #B07A00; background: #FFF6D9; border-radius: 8rpx; padding: 4rpx 12rpx; }
 .content { display: block; margin-top: 18rpx; font-size: 28rpx; color: #333; line-height: 1.7; }
 .imgs { display: flex; margin-top: 16rpx; }
-.img { width: 200rpx; height: 200rpx; border-radius: 12rpx; overflow: hidden; margin-right: 10rpx; background: linear-gradient(135deg, #ffb199, #ff6633); }
+.img { width: 200rpx; height: 200rpx; border-radius: 12rpx; overflow: hidden; margin-right: 10rpx; background: linear-gradient(135deg, #FFE08A, #FFC300); }
 .img-real { width: 100%; height: 100%; }
-.shop-chip, .loc-chip { display: inline-block; margin-top: 16rpx; background: #fff4ee; border: 1rpx solid #ffd9c7; color: #ff6633; font-size: 22rpx; border-radius: 26rpx; padding: 8rpx 20rpx; }
+.shop-chip, .loc-chip { display: inline-block; margin-top: 16rpx; background: #FFF6D9; border: 1rpx solid #FFE08A; color: #B07A00; font-size: 22rpx; border-radius: 26rpx; padding: 8rpx 20rpx; }
 .actions { margin-top: 18rpx; display: flex; }
 .act { display: flex; align-items: center; font-size: 24rpx; color: #999; margin-right: 40rpx; }
 .act.liked { color: #ff3b30; }
 .num { margin-left: 8rpx; }
 .empty { text-align: center; color: #999; font-size: 26rpx; padding: 100rpx 0; }
-.fab { position: fixed; right: 36rpx; bottom: 140rpx; width: 100rpx; height: 100rpx; border-radius: 50%; background: #ff6633; color: #fff; font-size: 52rpx; display: flex; align-items: center; justify-content: center; box-shadow: 0 8rpx 24rpx rgba(255, 102, 51, .4); }
+.fab { position: fixed; right: 36rpx; bottom: 140rpx; width: 100rpx; height: 100rpx; border-radius: 50%; background: #FFD100; color: #222; font-size: 52rpx; font-weight: 600; display: flex; align-items: center; justify-content: center; box-shadow: 0 8rpx 24rpx rgba(255, 195, 0, .45); }
 </style>

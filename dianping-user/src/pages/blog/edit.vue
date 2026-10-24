@@ -115,11 +115,11 @@ async function publish() {
 .page { min-height: 100vh; background: #f5f6f8; padding: 20rpx 0 40rpx; }
 .chips { display: flex; padding: 0 24rpx 16rpx; }
 .chip { font-size: 26rpx; color: #666; border: 1rpx solid #ddd; background: #fff; border-radius: 30rpx; padding: 12rpx 30rpx; margin-right: 16rpx; }
-.chip.on { color: #ff6633; border-color: #ff6633; background: #fff4ee; }
+.chip.on { color: #222; border-color: #FFC300; background: #FFD100; }
 .textarea { margin: 0 24rpx; width: auto; height: 300rpx; background: #fff; border-radius: 20rpx; padding: 24rpx; font-size: 28rpx; box-sizing: border-box; }
 .row { margin: 20rpx 24rpx 0; background: #fff; border-radius: 20rpx; padding: 24rpx; display: flex; align-items: center; justify-content: space-between; }
 .label { font-size: 26rpx; color: #666; }
-.picker { font-size: 26rpx; color: #ff6633; }
+.picker { font-size: 26rpx; color: #B07A00; }
 .input { flex: 1; margin-left: 20rpx; text-align: right; font-size: 26rpx; }
 .note { margin: 20rpx 32rpx 0; color: #bbb; font-size: 22rpx; }
 .uploader { display: flex; flex-wrap: wrap; padding: 0 24rpx; }
@@ -127,7 +127,7 @@ async function publish() {
 .img { width: 200rpx; height: 200rpx; border-radius: 12rpx; }
 .del { position: absolute; top: -10rpx; right: -10rpx; width: 40rpx; height: 40rpx; border-radius: 50%; background: rgba(0,0,0,.6); color: #fff; font-size: 26rpx; display: flex; align-items: center; justify-content: center; }
 .add { width: 200rpx; height: 200rpx; border: 1rpx dashed #ccc; border-radius: 12rpx; color: #999; font-size: 24rpx; display: flex; align-items: center; justify-content: center; }
-.btn { margin: 40rpx 24rpx 0; background: #ff6633; color: #fff; border-radius: 44rpx; font-size: 30rpx; }
+.btn { margin: 40rpx 24rpx 0; background: #FFD100; color: #222; font-weight: 600; border-radius: 44rpx; font-size: 30rpx; }
 .btn.disabled { opacity: .6; }
 .tip { display: block; text-align: center; color: #bbb; font-size: 22rpx; margin-top: 18rpx; }
 </style>

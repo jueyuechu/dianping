@@ -66,12 +66,12 @@ function doLogout() {
 
 <style scoped>
 .page { min-height: 100vh; background: #f5f6f8; padding-bottom: 40rpx; }
-.head { background: linear-gradient(135deg, #ff6633, #ff8c5a); padding: 50rpx 32rpx; display: flex; align-items: center; }
-.avatar { width: 120rpx; height: 120rpx; border-radius: 50%; background: #fff; color: #ff6633; font-size: 48rpx; display: flex; align-items: center; justify-content: center; }
-.head-info { flex: 1; margin-left: 24rpx; color: #fff; }
-.name { font-size: 34rpx; font-weight: 600; display: block; }
-.sub { font-size: 22rpx; opacity: .85; margin-top: 8rpx; display: block; }
-.login-btn { background: #fff; color: #ff6633; font-size: 26rpx; padding: 12rpx 36rpx; border-radius: 30rpx; }
+.head { background: #FFD100; padding: 50rpx 32rpx; display: flex; align-items: center; }
+.avatar { width: 120rpx; height: 120rpx; border-radius: 50%; background: #fff; color: #B07A00; font-size: 48rpx; font-weight: 600; display: flex; align-items: center; justify-content: center; }
+.head-info { flex: 1; margin-left: 24rpx; color: #222; }
+.name { font-size: 34rpx; font-weight: 700; display: block; }
+.sub { font-size: 22rpx; color: #6B4A00; margin-top: 8rpx; display: block; }
+.login-btn { background: #fff; color: #222; font-size: 26rpx; font-weight: 600; padding: 12rpx 36rpx; border-radius: 30rpx; }
 .grid { display: flex; background: #fff; padding: 30rpx 0; }
 .grid-item { flex: 1; display: flex; flex-direction: column; align-items: center; }
 .grid-num { font-size: 30rpx; font-weight: 600; color: #333; }

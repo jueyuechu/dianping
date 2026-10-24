@@ -37,10 +37,10 @@ function goReview() {
 <style scoped>
 .page { min-height: 100vh; background: #fff; display: flex; flex-direction: column; align-items: center; padding-top: 70rpx; }
 .tip { font-size: 28rpx; color: #333; }
-.code-box { margin-top: 40rpx; width: 560rpx; height: 200rpx; border: 2rpx dashed #ff6633; border-radius: 24rpx; display: flex; align-items: center; justify-content: center; }
-.code { font-size: 68rpx; font-weight: 700; letter-spacing: 16rpx; color: #ff6633; }
+.code-box { margin-top: 40rpx; width: 560rpx; height: 200rpx; border: 2rpx dashed #FFC300; border-radius: 24rpx; display: flex; align-items: center; justify-content: center; background: #FFFDF3; }
+.code { font-size: 68rpx; font-weight: 700; letter-spacing: 16rpx; color: #B07A00; }
 .qr { margin-top: 40rpx; width: 300rpx; height: 300rpx; border: 1rpx solid #eee; border-radius: 20rpx; display: flex; align-items: center; justify-content: center; color: #bbb; font-size: 26rpx; }
 .sub { margin-top: 24rpx; color: #999; font-size: 24rpx; }
-.btn { margin-top: 70rpx; background: #ff6633; color: #fff; font-size: 30rpx; padding: 20rpx 80rpx; border-radius: 44rpx; }
+.btn { margin-top: 70rpx; background: #FFD100; color: #222; font-weight: 600; font-size: 30rpx; padding: 20rpx 80rpx; border-radius: 44rpx; }
 .note { margin-top: 24rpx; color: #bbb; font-size: 22rpx; }
 </style>

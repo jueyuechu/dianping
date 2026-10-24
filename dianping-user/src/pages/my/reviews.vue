@@ -38,6 +38,6 @@ onShow(async () => {
 .time { color: #bbb; font-size: 22rpx; }
 .content { display: block; margin-top: 14rpx; font-size: 28rpx; color: #333; line-height: 1.7; }
 .tags { margin-top: 14rpx; }
-.tag { font-size: 20rpx; color: #ff6633; border: 1rpx solid #ff6633; border-radius: 6rpx; padding: 2rpx 10rpx; margin-right: 10rpx; }
+.tag { font-size: 20rpx; color: #B07A00; border: 1rpx solid #FFE08A; background: #FFF6D9; border-radius: 6rpx; padding: 2rpx 10rpx; margin-right: 10rpx; }
 .empty { text-align: center; color: #999; font-size: 26rpx; padding: 120rpx 0; }
 </style>

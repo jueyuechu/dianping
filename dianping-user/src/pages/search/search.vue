@@ -53,9 +53,9 @@ function goShop(id) {
 .page { min-height: 100vh; background: #f5f6f8; }
 .search-bar { background: #fff; padding: 20rpx 24rpx; display: flex; align-items: center; }
 .input { flex: 1; height: 72rpx; background: #f4f5f7; border-radius: 36rpx; padding: 0 28rpx; font-size: 26rpx; }
-.btn { margin-left: 16rpx; color: #ff6633; font-size: 28rpx; }
+.btn { margin-left: 16rpx; color: #B07A00; font-weight: 600; font-size: 28rpx; }
 .shop { margin: 20rpx 24rpx 0; background: #fff; border-radius: 20rpx; padding: 24rpx; display: flex; align-items: center; }
-.cover { width: 100rpx; height: 100rpx; border-radius: 16rpx; background: #ff6633; color: #fff; font-size: 36rpx; display: flex; align-items: center; justify-content: center; }
+.cover { width: 100rpx; height: 100rpx; border-radius: 16rpx; background: linear-gradient(135deg, #FFE08A, #FFC300); color: #6B4A00; font-weight: 600; font-size: 36rpx; display: flex; align-items: center; justify-content: center; }
 .info { margin-left: 20rpx; display: flex; flex-direction: column; }
 .name { font-size: 28rpx; font-weight: 600; }
 .meta { font-size: 22rpx; color: #999; margin-top: 10rpx; }

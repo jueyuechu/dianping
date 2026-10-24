@@ -37,9 +37,9 @@ async function doLogin() {
 
 <style scoped>
 .page { min-height: 100vh; background: #fff; display: flex; flex-direction: column; align-items: center; padding-top: 160rpx; }
-.logo { width: 160rpx; height: 160rpx; border-radius: 40rpx; background: linear-gradient(135deg, #ff6633, #ff8c5a); color: #fff; font-size: 56rpx; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+.logo { width: 160rpx; height: 160rpx; border-radius: 40rpx; background: linear-gradient(135deg, #FFE08A, #FFC300); color: #6B4A00; font-size: 56rpx; font-weight: 700; display: flex; align-items: center; justify-content: center; }
 .slogan { margin-top: 28rpx; color: #666; font-size: 28rpx; }
-.btn { margin-top: 90rpx; width: 560rpx; background: #ff6633; color: #fff; text-align: center; padding: 26rpx 0; border-radius: 44rpx; font-size: 30rpx; }
+.btn { margin-top: 90rpx; width: 560rpx; background: #FFD100; color: #222; font-weight: 600; text-align: center; padding: 26rpx 0; border-radius: 44rpx; font-size: 30rpx; }
 .btn.disabled { opacity: .6; }
 .note { margin-top: 26rpx; color: #bbb; font-size: 22rpx; }
 </style>
