@@ -4,14 +4,21 @@
 !/.gitignore
 !/dianping-platform/
 !/dianping-admin/
+!/dianping-user/
+!/dianping-merchant/
 
 # ================= 前端：依赖与构建产物 =================
 dianping-admin/node_modules/
 dianping-admin/dist/
+dianping-user/node_modules/
+dianping-user/dist/
+dianping-merchant/node_modules/
+dianping-merchant/dist/
 
 # ================= 后端：构建产物 =================
 dianping-platform/**/target/
 dianping-platform/**/build/
+dianping-platform/**/uploads/
 dianping-platform/**/out/
 *.class
 *.jar

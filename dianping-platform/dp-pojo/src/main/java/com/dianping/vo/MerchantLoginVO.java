@@ -23,4 +23,7 @@ public class MerchantLoginVO {
 
     /** 所属店铺名 */
     private String shopName;
+
+    /** 商户状态：0 待审核 1 正常 2 冻结（待审核可登录查看进度，但不可经营） */
+    private Integer merchantStatus;
 }

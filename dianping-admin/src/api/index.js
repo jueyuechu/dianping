@@ -41,6 +41,12 @@ export const reviewList = params => request.get('/admin/review/list', { params }
 export const reviewStatus = (id, status) => request.put(`/admin/review/${id}/status`, null, { params: { status } })
 export const reviewDelete = id => request.delete(`/admin/review/${id}`)
 
+// ---- 帖子管理 ----
+export const blogList = params => request.get('/admin/blog/list', { params })
+export const blogStatus = (id, status) => request.put(`/admin/blog/${id}/status`, null, { params: { status } })
+export const blogDelete = id => request.delete(`/admin/blog/${id}`)
+export const blogCommentDelete = id => request.delete(`/admin/blog/comment/${id}`)
+
 // ---- 系统设置 ----
 export const accountList = params => request.get('/admin/account/list', { params })
 export const roleList = () => request.get('/admin/role/list')

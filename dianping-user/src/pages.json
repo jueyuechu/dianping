@@ -1,0 +1,78 @@
+{
+  "pages": [
+    {
+      "path": "pages/index/index",
+      "style": { "navigationBarTitleText": "附近好店", "enablePullDownRefresh": true }
+    },
+    {
+      "path": "pages/shop/detail",
+      "style": { "navigationBarTitleText": "商家详情" }
+    },
+    {
+      "path": "pages/groupbuy/detail",
+      "style": { "navigationBarTitleText": "团购详情" }
+    },
+    {
+      "path": "pages/order/confirm",
+      "style": { "navigationBarTitleText": "确认订单" }
+    },
+    {
+      "path": "pages/order/list",
+      "style": { "navigationBarTitleText": "我的订单" }
+    },
+    {
+      "path": "pages/order/verify",
+      "style": { "navigationBarTitleText": "核销码" }
+    },
+    {
+      "path": "pages/review/write",
+      "style": { "navigationBarTitleText": "写评价" }
+    },
+    {
+      "path": "pages/discover/discover",
+      "style": { "navigationBarTitleText": "发现" }
+    },
+    {
+      "path": "pages/blog/detail",
+      "style": { "navigationBarTitleText": "笔记详情" }
+    },
+    {
+      "path": "pages/blog/edit",
+      "style": { "navigationBarTitleText": "发笔记" }
+    },
+    {
+      "path": "pages/my/my",
+      "style": { "navigationBarTitleText": "我的" }
+    },
+    {
+      "path": "pages/my/reviews",
+      "style": { "navigationBarTitleText": "我的评价" }
+    },
+    {
+      "path": "pages/login/login",
+      "style": { "navigationBarTitleText": "登录" }
+    },
+    {
+      "path": "pages/search/search",
+      "style": { "navigationBarTitleText": "搜索" }
+    }
+  ],
+  "tabBar": {
+    "color": "#999999",
+    "selectedColor": "#FF6633",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "black",
+    "list": [
+      { "pagePath": "pages/index/index", "text": "首页" },
+      { "pagePath": "pages/discover/discover", "text": "发现" },
+      { "pagePath": "pages/order/list", "text": "订单" },
+      { "pagePath": "pages/my/my", "text": "我的" }
+    ]
+  },
+  "globalStyle": {
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "点评",
+    "navigationBarBackgroundColor": "#ffffff",
+    "backgroundColor": "#f5f6f8"
+  }
+}

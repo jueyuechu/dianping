@@ -6,7 +6,7 @@ services:
     container_name: dianping-mysql
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: "123456"
+      MYSQL_ROOT_PASSWORD: "1234"
       MYSQL_DATABASE: dianping
       TZ: Asia/Shanghai
     command:

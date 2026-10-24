@@ -4,6 +4,7 @@
       <el-tab-pane label="菜品管理" name="dish" />
       <el-tab-pane label="团购管理" name="groupbuy" />
       <el-tab-pane label="评价管理" name="review" />
+      <el-tab-pane label="帖子管理" name="blog" />
     </el-tabs>
 
     <!-- 菜品 -->
@@ -66,7 +67,7 @@
     </template>
 
     <!-- 评价 -->
-    <template v-else>
+    <template v-else-if="tab === 'review'">
       <el-table :data="reviews" v-loading="loading" stripe>
         <el-table-column prop="id" label="ID" width="80" />
         <el-table-column prop="userId" label="用户ID" width="90" />
@@ -94,6 +95,40 @@
       <el-pagination style="margin-top:16px;justify-content:flex-end" background layout="total, prev, pager, next"
                      :total="total" :page-size="query.size" v-model:current-page="query.current" @current-change="load" />
     </template>
+
+    <!-- 帖子 -->
+    <template v-else>
+      <el-table :data="blogs" v-loading="loading" stripe>
+        <el-table-column prop="id" label="ID" width="70" />
+        <el-table-column prop="authorName" label="作者" width="120" />
+        <el-table-column prop="content" label="正文" show-overflow-tooltip min-width="260" />
+        <el-table-column prop="shopName" label="关联店铺" width="180" show-overflow-tooltip />
+        <el-table-column label="类型" width="90">
+          <template #default="{ row }">
+            <el-tag size="small" :type="row.type === 1 ? 'warning' : 'info'">{{ row.type === 1 ? '探店' : '动态' }}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="likedCount" label="赞" width="70" />
+        <el-table-column prop="commentCount" label="评论" width="80" />
+        <el-table-column label="状态" width="90">
+          <template #default="{ row }">
+            <el-tag :type="{ 0: 'success', 1: 'warning', 2: 'danger' }[row.status]">
+              {{ { 0: '正常', 1: '隐藏', 2: '删除' }[row.status] }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="createTime" label="发布时间" width="170" />
+        <el-table-column label="操作" width="170" fixed="right">
+          <template #default="{ row }">
+            <el-button v-if="row.status === 0" link type="warning" @click="setBlogStatus(row, 1)">隐藏</el-button>
+            <el-button v-if="row.status === 1" link type="success" @click="setBlogStatus(row, 0)">恢复</el-button>
+            <el-button v-if="row.status !== 2" link type="danger" @click="delBlog(row)">删除</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+      <el-pagination style="margin-top:16px;justify-content:flex-end" background layout="total, prev, pager, next"
+                     :total="total" :page-size="query.size" v-model:current-page="query.current" @current-change="load" />
+    </template>
   </el-card>
 </template>
 
@@ -103,7 +138,8 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   dishList, dishStatus, dishDelete,
   groupbuyList, groupbuyStatus, groupbuyDelete,
-  reviewList, reviewStatus, reviewDelete
+  reviewList, reviewStatus, reviewDelete,
+  blogList, blogStatus, blogDelete
 } from '../api'
 
 const tab = ref('dish')
@@ -114,6 +150,7 @@ const query = reactive({ current: 1, size: 10 })
 const dishes = ref([])
 const groupbuys = ref([])
 const reviews = ref([])
+const blogs = ref([])
 
 function dishStatusText(s) {
   return { 1: '上架', 0: '下架', 2: '售罄', 3: '停售' }[s] || s
@@ -131,9 +168,13 @@ async function load() {
       const data = await groupbuyList(query)
       groupbuys.value = data.records
       total.value = Number(data.total)
-    } else {
+    } else if (tab.value === 'review') {
       const data = await reviewList(query)
       reviews.value = data.records
+      total.value = Number(data.total)
+    } else {
+      const data = await blogList(query)
+      blogs.value = data.records
       total.value = Number(data.total)
     }
   } finally {
@@ -171,6 +212,19 @@ async function setReviewStatus(row, status) {
 async function delReview(row) {
   await ElMessageBox.confirm('确认删除该评价？', '删除', { type: 'warning' })
   await reviewDelete(row.id)
+  ElMessage.success('已删除')
+  load()
+}
+
+async function setBlogStatus(row, status) {
+  await blogStatus(row.id, status)
+  ElMessage.success('操作成功')
+  load()
+}
+
+async function delBlog(row) {
+  await ElMessageBox.confirm('确认删除该帖子？删除后用户端不再展示。', '删除', { type: 'warning' })
+  await blogDelete(row.id)
   ElMessage.success('已删除')
   load()
 }

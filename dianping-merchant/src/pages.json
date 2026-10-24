@@ -1,0 +1,32 @@
+{
+  "pages": [
+    { "path": "pages/login/login", "style": { "navigationBarTitleText": "商户登录" } },
+    { "path": "pages/register/register", "style": { "navigationBarTitleText": "商户入驻" } },
+    { "path": "pages/apply-status/apply-status", "style": { "navigationBarTitleText": "入驻进度" } },
+    { "path": "pages/workbench/workbench", "style": { "navigationBarTitleText": "工作台" } },
+    { "path": "pages/groupbuy/list", "style": { "navigationBarTitleText": "团购管理" } },
+    { "path": "pages/groupbuy/edit", "style": { "navigationBarTitleText": "团购编辑" } },
+    { "path": "pages/verify/verify", "style": { "navigationBarTitleText": "扫码核销" } },
+    { "path": "pages/shop/edit", "style": { "navigationBarTitleText": "店铺信息" } },
+    { "path": "pages/review/list", "style": { "navigationBarTitleText": "评价管理" } },
+    { "path": "pages/my/my", "style": { "navigationBarTitleText": "我的" } }
+  ],
+  "tabBar": {
+    "color": "#999999",
+    "selectedColor": "#00b578",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "black",
+    "list": [
+      { "pagePath": "pages/workbench/workbench", "text": "工作台" },
+      { "pagePath": "pages/groupbuy/list", "text": "团购" },
+      { "pagePath": "pages/verify/verify", "text": "核销" },
+      { "pagePath": "pages/my/my", "text": "我的" }
+    ]
+  },
+  "globalStyle": {
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "商户中心",
+    "navigationBarBackgroundColor": "#ffffff",
+    "backgroundColor": "#f5f6f8"
+  }
+}
