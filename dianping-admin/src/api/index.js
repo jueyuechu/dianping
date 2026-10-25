@@ -4,6 +4,7 @@ import request from '../utils/request'
 
 // ---- 认证 ----
 export const adminLogin = data => request.post('/admin/auth/login', data)
+export const adminLogout = () => request.post('/admin/auth/logout')
 
 // ---- 看板 ----
 export const dashboardOverview = () => request.get('/admin/dashboard/overview')
@@ -50,3 +51,6 @@ export const blogCommentDelete = id => request.delete(`/admin/blog/comment/${id}
 // ---- 系统设置 ----
 export const accountList = params => request.get('/admin/account/list', { params })
 export const roleList = () => request.get('/admin/role/list')
+
+// ---- AI 数据助手 ----
+export const aiText2Sql = question => request.post('/admin/ai/text2sql', { question })

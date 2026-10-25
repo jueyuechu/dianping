@@ -28,10 +28,19 @@
         <java.version>17</java.version>
         <mybatis-plus.version>3.5.17</mybatis-plus.version>
         <jjwt.version>0.13.0</jjwt.version>
+        <spring-ai.version>2.0.2</spring-ai.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
+            <!-- Spring AI（OpenAI 兼容协议）；2.x 对齐 Spring Boot 4 -->
+            <dependency>
+                <groupId>org.springframework.ai</groupId>
+                <artifactId>spring-ai-bom</artifactId>
+                <version>${spring-ai.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
             <!-- MyBatis-Plus：Boot 4 专用 starter -->
             <dependency>
                 <groupId>com.baomidou</groupId>

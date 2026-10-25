@@ -6,6 +6,18 @@ export function getToken() {
   return uni.getStorageSync('token') || ''
 }
 
+/** 登出：通知后端从 Redis 白名单移除 token（静默失败，不阻塞本地登出） */
+export function logoutRequest() {
+  const token = getToken()
+  if (!token) return
+  uni.request({
+    url: `${BASE_URL}/user/auth/logout`,
+    method: 'POST',
+    header: { Authorization: `Bearer ${token}` },
+    complete: () => {}
+  })
+}
+
 /**
  * 上传图片/视频（评价配图、笔记配图）
  * @returns Promise<string> 可访问 URL

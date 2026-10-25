@@ -7,6 +7,7 @@ import com.dianping.common.context.BaseContext;
 import com.dianping.common.exception.BaseException;
 import com.dianping.common.properties.JwtProperties;
 import com.dianping.common.utils.JwtUtil;
+import com.dianping.common.utils.PasswordUtil;
 import com.dianping.dto.MerchantLoginDTO;
 import com.dianping.dto.MerchantRegisterDTO;
 import com.dianping.entity.AuditTask;
@@ -17,6 +18,7 @@ import com.dianping.mapper.MerchantAccountMapper;
 import com.dianping.mapper.MerchantMapper;
 import com.dianping.service.AuditService;
 import com.dianping.service.MerchantService;
+import com.dianping.service.TokenService;
 import com.dianping.vo.MerchantLoginVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -43,13 +45,20 @@ public class MerchantServiceImpl implements MerchantService {
     @Autowired
     private JwtProperties jwtProperties;
 
+    @Autowired
+    private TokenService tokenService;
+
     @Override
     public MerchantLoginVO login(MerchantLoginDTO merchantLoginDTO) {
         MerchantAccount account = merchantAccountMapper.selectOne(new LambdaQueryWrapper<MerchantAccount>()
                 .eq(MerchantAccount::getUsername, merchantLoginDTO.getUsername()));
-        // 骨架阶段为演示明文比对，Phase 1 改为摘要加密
-        if (account == null || !account.getPassword().equals(merchantLoginDTO.getPassword())) {
+        if (account == null || !PasswordUtil.matches(merchantLoginDTO.getPassword(), account.getPassword())) {
             throw new BaseException(MessageConstant.PASSWORD_ERROR);
+        }
+        // 历史明文密码在首次登录成功后自动升级为 BCrypt
+        if (!PasswordUtil.isEncoded(account.getPassword())) {
+            account.setPassword(PasswordUtil.encode(merchantLoginDTO.getPassword()));
+            merchantAccountMapper.updateById(account);
         }
 
         Merchant merchant = merchantMapper.selectById(account.getMerchantId());
@@ -64,6 +73,7 @@ public class MerchantServiceImpl implements MerchantService {
         Map<String, Object> claims = new HashMap<>();
         claims.put(JwtClaimsConstant.MERCHANT_ID, account.getMerchantId());
         String token = JwtUtil.createJWT(jwtProperties.getMerchantSecretKey(), jwtProperties.getMerchantTtl(), claims);
+        tokenService.save(TokenService.SCOPE_MERCHANT, token, jwtProperties.getMerchantTtl());
 
         return MerchantLoginVO.builder()
                 .id(account.getId())
@@ -98,7 +108,7 @@ public class MerchantServiceImpl implements MerchantService {
         MerchantAccount account = new MerchantAccount();
         account.setMerchantId(merchant.getId());
         account.setUsername(dto.getUsername());
-        account.setPassword(dto.getPassword());
+        account.setPassword(PasswordUtil.encode(dto.getPassword()));
         account.setRole(1);
         account.setStatus(1);
         merchantAccountMapper.insert(account);

@@ -1,3 +1,5 @@
+import { logoutRequest } from '../api'
+
 export function isLogin() {
   return !!uni.getStorageSync('token')
 }
@@ -12,6 +14,8 @@ export function saveLogin(data) {
 }
 
 export function logout() {
+  // 先通知后端注销 Redis token，再清理本地
+  logoutRequest()
   uni.removeStorageSync('token')
   uni.removeStorageSync('userInfo')
 }

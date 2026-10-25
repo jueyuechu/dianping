@@ -9,6 +9,7 @@ const routes = [
     redirect: '/dashboard',
     children: [
       { path: 'dashboard', name: 'Dashboard', component: () => import('../views/Dashboard.vue'), meta: { title: '数据看板' } },
+      { path: 'ai', name: 'AiAssistant', component: () => import('../views/AiAssistant.vue'), meta: { title: 'AI 数据助手' } },
       { path: 'audit', name: 'Audit', component: () => import('../views/AuditCenter.vue'), meta: { title: '审核中心' } },
       { path: 'user', name: 'UserManage', component: () => import('../views/UserManage.vue'), meta: { title: '用户管理' } },
       { path: 'merchant', name: 'MerchantManage', component: () => import('../views/MerchantManage.vue'), meta: { title: '商户管理' } },

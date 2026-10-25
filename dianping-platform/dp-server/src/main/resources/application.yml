@@ -6,6 +6,11 @@ spring:
     name: dianping-server
   profiles:
     active: dev
+  # 统一加载项目根目录 .env（KEY=VALUE），缺失时不影响启动
+  config:
+    import:
+      - optional:file:./.env[.properties]
+      - optional:file:../.env[.properties]
   Jackson:
     time-zone: GMT+8
     date-format: yyyy-MM-dd HH:mm:ss

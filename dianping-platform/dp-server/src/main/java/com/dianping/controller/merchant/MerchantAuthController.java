@@ -1,10 +1,13 @@
 package com.dianping.controller.merchant;
 
 import com.dianping.common.result.Result;
+import com.dianping.common.utils.JwtUtil;
 import com.dianping.dto.MerchantLoginDTO;
 import com.dianping.dto.MerchantRegisterDTO;
 import com.dianping.service.MerchantService;
+import com.dianping.service.TokenService;
 import com.dianping.vo.MerchantLoginVO;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +23,9 @@ public class MerchantAuthController {
 
     @Autowired
     private MerchantService merchantService;
+
+    @Autowired
+    private TokenService tokenService;
 
     /**
      * 商户/员工登录
@@ -43,5 +49,14 @@ public class MerchantAuthController {
     @GetMapping("/apply-status")
     public Result<Map<String, Object>> applyStatus() {
         return Result.success(merchantService.applyStatus());
+    }
+
+    /**
+     * 登出：从 Redis 白名单移除当前 token
+     */
+    @PostMapping("/logout")
+    public Result<Void> logout(HttpServletRequest request) {
+        tokenService.revoke(TokenService.SCOPE_MERCHANT, JwtUtil.resolveToken(request.getHeader("Authorization")));
+        return Result.success();
     }
 }

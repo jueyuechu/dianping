@@ -10,6 +10,7 @@ import com.dianping.dto.UserLoginDTO;
 import com.dianping.entity.User;
 import com.dianping.mapper.UserMapper;
 import com.dianping.service.UserService;
+import com.dianping.service.TokenService;
 import com.dianping.service.WeChatService;
 import com.dianping.vo.UserLoginVO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +31,9 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private WeChatService weChatService;
 
+    @Autowired
+    private TokenService tokenService;
+
     @Override
     public UserLoginVO login(UserLoginDTO userLoginDTO) {
         // 微信 code 换取 openid（mock 模式下为本地模拟，见 WeChatServiceImpl）
@@ -48,6 +52,7 @@ public class UserServiceImpl implements UserService {
         Map<String, Object> claims = new HashMap<>();
         claims.put(JwtClaimsConstant.USER_ID, user.getId());
         String token = JwtUtil.createJWT(jwtProperties.getUserSecretKey(), jwtProperties.getUserTtl(), claims);
+        tokenService.save(TokenService.SCOPE_USER, token, jwtProperties.getUserTtl());
 
         return UserLoginVO.builder()
                 .id(user.getId())

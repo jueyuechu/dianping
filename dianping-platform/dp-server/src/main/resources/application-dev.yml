@@ -1,47 +1,60 @@
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/dianping?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
-    username: root
-    password: "1234"
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:dianping}?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:1234}
   data:
     redis:
-      host: localhost
-      port: 6379
-      password: "1234"
-      database: 0
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:1234}
+      database: ${REDIS_DATABASE:0}
   servlet:
     multipart:
       max-file-size: 10MB
       max-request-size: 20MB
+  # Spring AI：OpenAI 兼容协议；未配置真实 Key 时保持占位，mock=true 不会发起调用
+  ai:
+    openai:
+      base-url: ${AI_BASE_URL:https://api.openai.com/v1}
+      api-key: ${AI_API_KEY:sk-not-configured}
+      chat:
+        options:
+          model: ${AI_MODEL:gpt-4o-mini}
+          temperature: ${AI_TEMPERATURE:0}
 
 dianping:
   jwt:
     # HS256 密钥要求至少 32 字节
-    user-secret-key: dianping-user-jwt-secret-key-2026-0123456789ab
-    user-ttl: 604800000      # 7 天（毫秒）
-    admin-secret-key: dianping-admin-jwt-secret-key-2026-0123456789ab
-    admin-ttl: 7200000       # 2 小时
-    merchant-secret-key: dianping-merchant-jwt-secret-key-2026-0123456789ab
-    merchant-ttl: 7200000    # 2 小时
+    user-secret-key: ${JWT_USER_SECRET:dianping-user-jwt-secret-key-2026-0123456789ab}
+    user-ttl: ${JWT_USER_TTL:604800000}      # 7 天（毫秒）
+    admin-secret-key: ${JWT_ADMIN_SECRET:dianping-admin-jwt-secret-key-2026-0123456789ab}
+    admin-ttl: ${JWT_ADMIN_TTL:7200000}       # 2 小时
+    merchant-secret-key: ${JWT_MERCHANT_SECRET:dianping-merchant-jwt-secret-key-2026-0123456789ab}
+    merchant-ttl: ${JWT_MERCHANT_TTL:7200000}    # 2 小时
   # MinIO 对象存储（Phase 1 接入）
   minio:
-    endpoint: http://localhost:9000
-    access-key: minioadmin
-    secret-key: minioadmin
-    bucket: dianping
-    url-prefix: /minio
+    endpoint: ${MINIO_ENDPOINT:http://localhost:9000}
+    access-key: ${MINIO_ACCESS_KEY:minioadmin}
+    secret-key: ${MINIO_SECRET_KEY:minioadmin}
+    bucket: ${MINIO_BUCKET:dianping}
+    url-prefix: ${MINIO_URL_PREFIX:/minio}
 
   # 高德地图 Web 服务（Phase 1 接入，附近商家距离计算）
   amap:
-    key: 50b6775c9db2ccb5abc37ff02c8769fc
+    key: ${AMAP_KEY:}
   # 微信小程序：mock=true 时使用本地模拟登录，填好 appid/secret 后置为 false 即走真实 code2session
   wechat:
-    appid: your-wechat-appid
-    secret: your-wechat-secret
-    mock: true
+    appid: ${WECHAT_APPID:your-wechat-appid}
+    secret: ${WECHAT_SECRET:your-wechat-secret}
+    mock: ${WECHAT_MOCK:true}
   # 文件上传：本地存储（开发默认）；生产可替换为 MinIO（S3 兼容）
   upload:
-    mode: local
-    local-path: ./uploads
-    public-base-url: http://localhost:8080
+    mode: ${UPLOAD_MODE:local}
+    local-path: ${UPLOAD_LOCAL_PATH:./uploads}
+    public-base-url: ${UPLOAD_PUBLIC_BASE_URL:http://localhost:8080}
+  # AI 数据助手：mock=true 使用内置规则，无 Key 也能演示；LLM 连接参数见 spring.ai.openai
+  ai:
+    mock: ${AI_MOCK:true}
+    max-rows: ${AI_MAX_ROWS:50}

@@ -5,6 +5,18 @@ export function getToken() {
   return uni.getStorageSync('merchant_token') || ''
 }
 
+/** 登出：通知后端从 Redis 白名单移除 token（静默失败，不阻塞本地登出） */
+export function logoutRequest() {
+  const token = getToken()
+  if (!token) return
+  uni.request({
+    url: `${BASE_URL}/merchant/auth/logout`,
+    method: 'POST',
+    header: { Authorization: `Bearer ${token}` },
+    complete: () => {}
+  })
+}
+
 export function request(path, options = {}) {
   const { method = 'GET', data } = options
   return new Promise((resolve, reject) => {

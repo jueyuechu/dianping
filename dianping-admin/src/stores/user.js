@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { adminLogin } from '../api'
+import { adminLogin, adminLogout } from '../api'
 
 export const useUserStore = defineStore('user', {
   state: () => ({
@@ -17,7 +17,13 @@ export const useUserStore = defineStore('user', {
       localStorage.setItem('admin_token', data.token)
       localStorage.setItem('admin_info', JSON.stringify(this.userInfo))
     },
-    logout() {
+    async logout() {
+      // 通知后端从 Redis 白名单移除 token（失败不阻断本地登出）
+      try {
+        await adminLogout()
+      } catch (e) {
+        // ignore
+      }
       this.token = ''
       this.userInfo = null
       localStorage.removeItem('admin_token')

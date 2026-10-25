@@ -2,6 +2,7 @@ package com.dianping.interceptor;
 
 import com.dianping.common.context.BaseContext;
 import com.dianping.common.utils.JwtUtil;
+import com.dianping.service.TokenService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -12,7 +13,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import java.util.List;
 
 /**
- * JWT 登录拦截器：解析 Authorization 头（支持 Bearer 前缀），校验通过后写入 BaseContext
+ * JWT 登录拦截器：校验 Authorization 头 + Redis token 白名单，通过后写入 BaseContext
  */
 @Slf4j
 public class JwtTokenInterceptor implements HandlerInterceptor {
@@ -22,16 +23,20 @@ public class JwtTokenInterceptor implements HandlerInterceptor {
     /** token 中的身份标识 key（userId / adminId / merchantId） */
     private final String claimName;
 
+    /** token 白名单作用域（user / admin / merchant） */
+    private final String tokenScope;
+
+    private final TokenService tokenService;
+
     /** 允许匿名访问的 GET 路径前缀（如团购详情浏览，写操作仍需登录） */
     private final List<String> anonymousGetPrefixes;
 
-    public JwtTokenInterceptor(String secretKey, String claimName) {
-        this(secretKey, claimName, List.of());
-    }
-
-    public JwtTokenInterceptor(String secretKey, String claimName, List<String> anonymousGetPrefixes) {
+    public JwtTokenInterceptor(String secretKey, String claimName, String tokenScope,
+                               TokenService tokenService, List<String> anonymousGetPrefixes) {
         this.secretKey = secretKey;
         this.claimName = claimName;
+        this.tokenScope = tokenScope;
+        this.tokenService = tokenService;
         this.anonymousGetPrefixes = anonymousGetPrefixes;
     }
 
@@ -53,18 +58,15 @@ public class JwtTokenInterceptor implements HandlerInterceptor {
             }
         }
 
-        String token = request.getHeader("Authorization");
-        if (token != null && token.startsWith("Bearer ")) {
-            token = token.substring(7);
-        }
+        String token = JwtUtil.resolveToken(request.getHeader("Authorization"));
 
-        // 匿名浏览接口：有 token 时仍解析并写入上下文（用于 liked 等个性化字段），无 token 直接放行
+        // 匿名浏览接口：token 有效时写入上下文（用于 liked 等个性化字段），无效则直接放行
         if (anonymousGet) {
             if (token != null && !token.isBlank()) {
                 try {
                     Claims claims = JwtUtil.parseJWT(secretKey, token);
                     Long id = claims.get(claimName, Long.class);
-                    if (id != null) {
+                    if (id != null && tokenService.isValid(tokenScope, token)) {
                         BaseContext.setCurrentId(id);
                     }
                 } catch (Exception e) {
@@ -81,7 +83,8 @@ public class JwtTokenInterceptor implements HandlerInterceptor {
         try {
             Claims claims = JwtUtil.parseJWT(secretKey, token);
             Long id = claims.get(claimName, Long.class);
-            if (id == null) {
+            // 白名单校验：登出后的 token 即使未过期也不可用
+            if (id == null || !tokenService.isValid(tokenScope, token)) {
                 writeUnauthorized(response);
                 return false;
             }

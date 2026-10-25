@@ -31,6 +31,18 @@ public class JwtUtil {
     }
 
     /**
+     * 从 Authorization 头解析 token（兼容 Bearer 前缀）
+     */
+    public static String resolveToken(String authorizationHeader) {
+        if (authorizationHeader == null || authorizationHeader.isBlank()) {
+            return null;
+        }
+        return authorizationHeader.startsWith("Bearer ")
+                ? authorizationHeader.substring(7)
+                : authorizationHeader;
+    }
+
+    /**
      * 解析 JWT，过期/非法会抛异常
      */
     public static Claims parseJWT(String secretKey, String token) {

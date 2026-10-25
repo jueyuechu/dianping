@@ -828,9 +828,9 @@ CREATE TABLE `tb_activity` (
 -- 演示种子数据
 -- =====================================================================
 
--- 管理员（演示密码明文 123456，正式环境必须加密存储）
+-- 管理员（演示密码 123456，BCrypt 密文）
 INSERT INTO `tb_admin` (`username`, `password`, `real_name`, `phone`, `status`) VALUES
-('admin', '123456', '超管', '13800000000', 1);
+('admin', '$2a$10$962YdRI03rXGxgdHnuqLBemFr/w8hGMxIwTq3gaw4yXUM8kdRDHQ2', '超管', '13800000000', 1);
 
 -- 角色
 INSERT INTO `tb_role` (`role_name`, `role_key`, `sort`) VALUES
@@ -871,7 +871,7 @@ INSERT INTO `tb_merchant` (`name`, `license_no`, `legal_person`, `contact_phone`
 ('杭州海悦餐饮管理有限公司', '91330100MA2DEMO001', '张三', '13900000001', 1);
 
 INSERT INTO `tb_merchant_account` (`merchant_id`, `username`, `password`, `role`, `status`) VALUES
-(1, 'mer001', '123456', 1, 1);
+(1, 'mer001', '$2a$10$962YdRI03rXGxgdHnuqLBemFr/w8hGMxIwTq3gaw4yXUM8kdRDHQ2', 1, 1);
 
 INSERT INTO `tb_shop` (`merchant_id`, `name`, `type_id`, `area`, `address`, `x`, `y`, `avg_price`, `sold`, `comments`, `score`, `taste_score`, `env_score`, `service_score`, `value_score`, `open_hours`, `phone`, `status`) VALUES
 (1, '海底捞火锅（水晶城店）', 2, '大关', '上塘路458号水晶城购物中心F6', 120.15, 30.31, 104, 5300, 3035, 49, 49, 48, 50, 47, '10:00-次日07:00', '057188888888', 1);

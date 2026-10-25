@@ -9,6 +9,7 @@
       <el-menu :default-active="route.path" :collapse="collapse" router background-color="#1f2430"
                text-color="#a3a8b3" active-text-color="#fff" class="menu">
         <el-menu-item index="/dashboard"><el-icon><DataAnalysis /></el-icon><span>数据看板</span></el-menu-item>
+        <el-menu-item index="/ai"><el-icon><MagicStick /></el-icon><span>AI 数据助手</span></el-menu-item>
         <el-menu-item index="/audit"><el-icon><Stamp /></el-icon><span>审核中心</span></el-menu-item>
         <el-menu-item index="/user"><el-icon><User /></el-icon><span>用户管理</span></el-menu-item>
         <el-menu-item index="/merchant"><el-icon><Shop /></el-icon><span>商户管理</span></el-menu-item>
@@ -61,9 +62,9 @@ const collapse = ref(false)
 const avatarText = computed(() =>
   (userStore.userInfo?.realName || userStore.userInfo?.username || '管').slice(0, 1))
 
-function handleCommand(cmd) {
+async function handleCommand(cmd) {
   if (cmd === 'logout') {
-    userStore.logout()
+    await userStore.logout()
     router.push('/login')
   }
 }
