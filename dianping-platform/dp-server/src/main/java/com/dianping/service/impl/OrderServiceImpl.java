@@ -45,6 +45,9 @@ public class OrderServiceImpl implements OrderService {
     @Autowired
     private ShopMapper shopMapper;
 
+    @Autowired
+    private com.dianping.mq.NotificationProducer notificationProducer;
+
     private static final Random RANDOM = new Random();
 
     @Override
@@ -82,6 +85,7 @@ public class OrderServiceImpl implements OrderService {
         order.setStatus(1);
         order.setVerifyCode(String.format("%06d", RANDOM.nextInt(1000000)));
         groupbuyOrderMapper.insert(order);
+        notificationProducer.orderCreated(order);
         return order;
     }
 

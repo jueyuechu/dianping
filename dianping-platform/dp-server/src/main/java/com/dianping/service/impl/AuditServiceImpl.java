@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.dianping.common.exception.BaseException;
 import com.dianping.entity.*;
 import com.dianping.mapper.*;
+import com.dianping.mq.NotificationProducer;
 import com.dianping.service.AuditService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -35,6 +36,9 @@ public class AuditServiceImpl implements AuditService {
 
     @Autowired
     private BlogMapper blogMapper;
+
+    @Autowired
+    private NotificationProducer notificationProducer;
 
     @Override
     public Page<AuditTask> pageTasks(long current, long size, Integer bizType, Integer status) {
@@ -72,6 +76,7 @@ public class AuditServiceImpl implements AuditService {
 
         applyBizStatus(task.getBizType(), task.getBizId(), true);
         writeRecord(taskId, auditorId, 3, "审核通过");
+        notificationProducer.auditResult(task, true, null);
     }
 
     @Override
@@ -87,6 +92,7 @@ public class AuditServiceImpl implements AuditService {
 
         applyBizStatus(task.getBizType(), task.getBizId(), false);
         writeRecord(taskId, auditorId, 4, reason);
+        notificationProducer.auditResult(task, false, reason);
     }
 
     /**

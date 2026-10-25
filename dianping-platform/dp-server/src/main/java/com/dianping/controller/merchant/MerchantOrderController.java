@@ -14,6 +14,7 @@ import com.dianping.mapper.GroupbuyMapper;
 import com.dianping.mapper.GroupbuyOrderMapper;
 import com.dianping.mapper.ShopMapper;
 import com.dianping.mapper.VerificationRecordMapper;
+import com.dianping.mq.NotificationProducer;
 import com.dianping.vo.OrderItemVO;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +45,9 @@ public class MerchantOrderController {
 
     @Autowired
     private GroupbuyMapper groupbuyMapper;
+
+    @Autowired
+    private NotificationProducer notificationProducer;
 
     /**
      * 团购订单列表（按当前商户名下店铺过滤，含团购名/店铺名）
@@ -105,6 +109,7 @@ public class MerchantOrderController {
         record.setVerifyTime(LocalDateTime.now());
         record.setMethod(dto.getMethod() == null ? 2 : dto.getMethod());
         verificationRecordMapper.insert(record);
+        notificationProducer.orderVerified(order, record);
         return Result.success(order);
     }
 

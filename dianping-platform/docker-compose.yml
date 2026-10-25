@@ -1,5 +1,13 @@
+# =====================================================================
 # 中间件编排：MySQL 8 + Redis 7 + MinIO + RabbitMQ 3.13
-# 用法：docker compose up -d
+#
+# 虚拟机部署：
+#   1. 将 dianping-platform 目录（至少 docker-compose.yml、sql/、.env）复制到虚拟机
+#   2. 同目录放置 .env（参考 .env.example），执行 docker compose up -d
+#   3. 防火墙放行：3306(MySQL) 6379(Redis) 9000/9001(MinIO) 5672/15672(RabbitMQ)
+#   4. 后端不在虚拟机时，.env 中 DB_HOST/REDIS_HOST/MINIO_ENDPOINT/RABBITMQ_HOST
+#      改为虚拟机 IP，并把 MQ_ENABLED 设为 true
+# =====================================================================
 services:
   mysql:
     image: mysql:8.0
@@ -7,6 +15,8 @@ services:
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: "${DB_PASSWORD:-1234}"
+      # 允许后端从虚拟机外部以 root 连接（仅开发/演示环境使用）
+      MYSQL_ROOT_HOST: "%"
       MYSQL_DATABASE: "${DB_NAME:-dianping}"
       TZ: Asia/Shanghai
     command:
@@ -17,16 +27,39 @@ services:
     volumes:
       - dianping-mysql-data:/var/lib/mysql
       - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro   # 首次启动自动建表
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$$MYSQL_ROOT_PASSWORD --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - dianping-net
 
   redis:
     image: redis:7
     container_name: dianping-redis
     restart: unless-stopped
-    command: ["redis-server", "--requirepass", "${REDIS_PASSWORD:-1234}"]
+    environment:
+      REDIS_PASSWORD: "${REDIS_PASSWORD:-1234}"
+      TZ: Asia/Shanghai
+    command:
+      - redis-server
+      - --requirepass
+      - "${REDIS_PASSWORD:-1234}"
+      - --appendonly
+      - "yes"
     ports:
       - "6379:6379"
     volumes:
       - dianping-redis-data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a $$REDIS_PASSWORD ping | grep PONG"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - dianping-net
 
   minio:
     image: minio/minio:latest
@@ -36,24 +69,49 @@ services:
     environment:
       MINIO_ROOT_USER: "${MINIO_ACCESS_KEY:-minioadmin}"
       MINIO_ROOT_PASSWORD: "${MINIO_SECRET_KEY:-minioadmin}"
+      TZ: Asia/Shanghai
     ports:
       - "9000:9000"    # S3 API
       - "9001:9001"    # 控制台
     volumes:
       - dianping-minio-data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://127.0.0.1:9000/minio/health/live || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - dianping-net
 
   rabbitmq:
     image: rabbitmq:3.13-management
     container_name: dianping-rabbitmq
     restart: unless-stopped
     environment:
-      RABBITMQ_DEFAULT_USER: guest
-      RABBITMQ_DEFAULT_PASS: guest
+      # 不使用 guest（guest 默认只允许本机连接，远程后端会连不上）
+      RABBITMQ_DEFAULT_USER: "${RABBITMQ_USERNAME:-dianping}"
+      RABBITMQ_DEFAULT_PASS: "${RABBITMQ_PASSWORD:-dianping123}"
+      TZ: Asia/Shanghai
     ports:
       - "5672:5672"    # AMQP
       - "15672:15672"  # 管理后台
+    volumes:
+      - dianping-rabbitmq-data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+    networks:
+      - dianping-net
 
 volumes:
   dianping-mysql-data:
   dianping-redis-data:
   dianping-minio-data:
+  dianping-rabbitmq-data:
+
+networks:
+  dianping-net:
+    driver: bridge

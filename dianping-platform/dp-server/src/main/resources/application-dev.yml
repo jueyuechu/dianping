@@ -10,6 +10,19 @@ spring:
       port: ${REDIS_PORT:6379}
       password: ${REDIS_PASSWORD:1234}
       database: ${REDIS_DATABASE:0}
+  # RabbitMQ：下单/核销/审核异步通知；未启动 Broker 时连接失败但不影响主业务
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+    virtual-host: ${RABBITMQ_VIRTUAL_HOST:/}
+    connection-timeout: 3s
+    listener:
+      simple:
+        auto-startup: ${MQ_ENABLED:true}
+        missing-queues-fatal: false
+        recovery-interval: 30s
   servlet:
     multipart:
       max-file-size: 10MB
@@ -58,3 +71,6 @@ dianping:
   ai:
     mock: ${AI_MOCK:true}
     max-rows: ${AI_MAX_ROWS:50}
+  # 消息队列：false 时跳过收发（本地无 RabbitMQ 时可保持 true，发送失败仅告警）
+  mq:
+    enabled: ${MQ_ENABLED:true}
