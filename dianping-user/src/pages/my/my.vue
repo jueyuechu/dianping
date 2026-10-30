@@ -18,7 +18,7 @@
 
     <view class="list">
       <view class="li" @click="goReviews"><text>我的评价</text><text class="arrow">›</text></view>
-      <view class="li" @click="toast('消息通知 P1 上线')"><text>消息通知</text><text class="arrow">›</text></view>
+      <view class="li" @click="goMessages"><text>消息通知{{ unread ? '（' + unread + '）' : '' }}</text><text class="arrow">›</text></view>
       <view class="li" @click="toast('客服与反馈')"><text>客服与反馈</text><text class="arrow">›</text></view>
     </view>
 
@@ -29,13 +29,26 @@
 <script setup>
 import { ref } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
+import { api } from '../../api'
 import { getUser, logout } from '../../utils/auth'
 
 const user = ref(null)
+const unread = ref(0)
 
 onShow(() => {
   user.value = getUser()
+  loadUnread()
 })
+
+function loadUnread() {
+  if (!user.value) {
+    unread.value = 0
+    return
+  }
+  api.unreadMessages()
+    .then(n => { unread.value = n || 0 })
+    .catch(() => {})
+}
 
 function goLogin() {
   uni.navigateTo({ url: '/pages/login/login' })
@@ -51,6 +64,14 @@ function goReviews() {
     return
   }
   uni.navigateTo({ url: '/pages/my/reviews' })
+}
+
+function goMessages() {
+  if (!user.value) {
+    goLogin()
+    return
+  }
+  uni.navigateTo({ url: '/pages/my/messages' })
 }
 
 function toast(title) {

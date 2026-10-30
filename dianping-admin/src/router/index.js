@@ -15,6 +15,7 @@ const routes = [
       { path: 'merchant', name: 'MerchantManage', component: () => import('../views/MerchantManage.vue'), meta: { title: '商户管理' } },
       { path: 'content', name: 'ContentManage', component: () => import('../views/ContentManage.vue'), meta: { title: '内容管理' } },
       { path: 'report', name: 'ReportManage', component: () => import('../views/ReportManage.vue'), meta: { title: '举报处理' } },
+      { path: 'refund', name: 'RefundManage', component: () => import('../views/RefundManage.vue'), meta: { title: '退款审核' } },
       { path: 'system', name: 'System', component: () => import('../views/SystemManage.vue'), meta: { title: '系统设置' } }
     ]
   }

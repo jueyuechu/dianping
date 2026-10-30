@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.dianping.common.context.BaseContext;
 import com.dianping.common.exception.BaseException;
 import com.dianping.dto.GroupbuyOrderDTO;
+import com.dianping.dto.PayNotifyDTO;
 import com.dianping.entity.Groupbuy;
 import com.dianping.entity.GroupbuyOrder;
 import com.dianping.entity.Payment;
@@ -14,6 +15,7 @@ import com.dianping.mapper.PaymentMapper;
 import com.dianping.mapper.ShopMapper;
 import com.dianping.entity.Shop;
 import com.dianping.service.OrderService;
+import com.dianping.service.UserBanService;
 import com.dianping.vo.OrderItemVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -48,6 +50,9 @@ public class OrderServiceImpl implements OrderService {
     @Autowired
     private com.dianping.mq.NotificationProducer notificationProducer;
 
+    @Autowired
+    private UserBanService userBanService;
+
     private static final Random RANDOM = new Random();
 
     @Override
@@ -57,6 +62,8 @@ public class OrderServiceImpl implements OrderService {
         if (userId == null) {
             throw new BaseException(401, "未登录或登录已过期");
         }
+        // 禁下单封禁校验
+        userBanService.assertAllowed(userId, 4);
         Groupbuy groupbuy = groupbuyMapper.selectById(dto.getGroupbuyId());
         if (groupbuy == null) {
             throw new BaseException(404, "团购不存在");
@@ -122,6 +129,40 @@ public class OrderServiceImpl implements OrderService {
         result.put("nonceStr", String.valueOf(System.currentTimeMillis()));
         result.put("paySign", "MOCK_SIGN");
         return result;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void payNotify(PayNotifyDTO dto) {
+        if (dto == null || dto.getOrderNo() == null || dto.getOrderNo().isBlank()) {
+            throw new BaseException("支付回调参数不完整");
+        }
+        if (!"SUCCESS".equalsIgnoreCase(dto.getTradeState())) {
+            return;
+        }
+        GroupbuyOrder order = groupbuyOrderMapper.selectOne(new LambdaQueryWrapper<GroupbuyOrder>()
+                .eq(GroupbuyOrder::getOrderNo, dto.getOrderNo()));
+        // 订单不存在或已处理（含已使用/已退款/已过期）时直接返回，保证回调幂等
+        if (order == null || order.getStatus() == null || order.getStatus() != 1) {
+            return;
+        }
+        order.setStatus(2);
+        groupbuyOrderMapper.updateById(order);
+
+        long paid = paymentMapper.selectCount(new LambdaQueryWrapper<Payment>()
+                .eq(Payment::getOrderId, order.getId())
+                .eq(Payment::getStatus, 2));
+        if (paid == 0) {
+            Payment payment = new Payment();
+            payment.setOrderId(order.getId());
+            payment.setPayNo(dto.getPayNo() == null || dto.getPayNo().isBlank()
+                    ? "WX" + System.currentTimeMillis() : dto.getPayNo());
+            payment.setAmount(dto.getAmount() == null ? order.getAmount() : dto.getAmount());
+            payment.setChannel(1);
+            payment.setStatus(2);
+            payment.setPayTime(LocalDateTime.now());
+            paymentMapper.insert(payment);
+        }
     }
 
     @Override

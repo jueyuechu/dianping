@@ -13,6 +13,7 @@
       <view class="li" @click="goShop"><text>店铺信息</text><text class="arrow">›</text></view>
       <view class="li" @click="goGroupbuy"><text>团购管理</text><text class="arrow">›</text></view>
       <view class="li" @click="goReview"><text>评价管理</text><text class="arrow">›</text></view>
+      <view class="li" @click="goMessages"><text>消息通知{{ unread ? '（' + unread + '）' : '' }}</text><text class="arrow">›</text></view>
       <view class="li" @click="toast('对账结算 P1 上线')"><text>对账与结算</text><text class="arrow">›</text></view>
       <view class="li" @click="toast('客服与申诉 P1 上线')"><text>客服与申诉</text><text class="arrow">›</text></view>
     </view>
@@ -24,14 +25,19 @@
 <script setup>
 import { computed, ref } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
+import { api } from '../../api'
 import { getMerchant, logout, requireLogin } from '../../utils/auth'
 
 const info = ref({})
+const unread = ref(0)
 const roleText = computed(() => ({ 1: '老板', 2: '店长', 3: '员工' }[info.value.role] || '员工'))
 
 onShow(() => {
   if (!requireLogin()) return
   info.value = getMerchant() || {}
+  api.unreadMessages()
+    .then(n => { unread.value = n || 0 })
+    .catch(() => {})
 })
 
 function goApply() {
@@ -45,6 +51,9 @@ function goGroupbuy() {
 }
 function goReview() {
   uni.navigateTo({ url: '/pages/review/list' })
+}
+function goMessages() {
+  uni.navigateTo({ url: '/pages/my/messages' })
 }
 function toast(title) {
   uni.showToast({ title, icon: 'none' })

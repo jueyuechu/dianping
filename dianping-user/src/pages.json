@@ -49,6 +49,10 @@
       "style": { "navigationBarTitleText": "我的评价" }
     },
     {
+      "path": "pages/my/messages",
+      "style": { "navigationBarTitleText": "消息通知" }
+    },
+    {
       "path": "pages/login/login",
       "style": { "navigationBarTitleText": "登录" }
     },

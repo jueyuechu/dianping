@@ -15,6 +15,7 @@
         <el-menu-item index="/merchant"><el-icon><Shop /></el-icon><span>商户管理</span></el-menu-item>
         <el-menu-item index="/content"><el-icon><Document /></el-icon><span>内容管理</span></el-menu-item>
         <el-menu-item index="/report"><el-icon><Warning /></el-icon><span>举报处理</span></el-menu-item>
+        <el-menu-item index="/refund"><el-icon><Money /></el-icon><span>退款审核</span></el-menu-item>
         <el-menu-item index="/system"><el-icon><Setting /></el-icon><span>系统设置</span></el-menu-item>
       </el-menu>
     </el-aside>

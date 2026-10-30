@@ -9,6 +9,7 @@
     { "path": "pages/verify/verify", "style": { "navigationBarTitleText": "扫码核销" } },
     { "path": "pages/shop/edit", "style": { "navigationBarTitleText": "店铺信息" } },
     { "path": "pages/review/list", "style": { "navigationBarTitleText": "评价管理" } },
+    { "path": "pages/my/messages", "style": { "navigationBarTitleText": "消息通知" } },
     { "path": "pages/my/my", "style": { "navigationBarTitleText": "我的" } }
   ],
   "tabBar": {

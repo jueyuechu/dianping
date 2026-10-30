@@ -97,9 +97,18 @@ export const api = {
   orders: status => request('/user/order/list' + (status ? `?status=${status}` : '')),
   orderDetail: id => request(`/user/order/${id}`),
   verifyCode: id => request(`/user/order/${id}/verify-code`),
+  // 退款
+  applyRefund: data => request('/user/refund/apply', { method: 'POST', data }),
+  refunds: () => request('/user/refund/list?current=1&size=100'),
   // 评价
   createReview: data => request('/user/review', { method: 'POST', data }),
   myReviews: () => request('/user/review/my'),
+  // 消息中心
+  messages: (current = 1, size = 20, isRead) =>
+    request(`/user/message/list?current=${current}&size=${size}${isRead !== undefined && isRead !== null ? `&isRead=${isRead}` : ''}`),
+  unreadMessages: () => request('/user/message/unread-count'),
+  readMessage: id => request(`/user/message/${id}/read`, { method: 'PUT' }),
+  readAllMessages: () => request('/user/message/read-all', { method: 'PUT' }),
   // 登录
   login: code => request('/user/auth/login', { method: 'POST', data: { code, nickName: '微信用户' } }),
   // 社区

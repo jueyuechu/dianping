@@ -26,8 +26,12 @@ mybatis-plus:
       logic-delete-value: 1
       logic-not-delete-value: 0
 
+# OpenAPI / Swagger UI
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
 # Phase 1 计划引入：
-#   Knife4j（knife4j-openapi3-jakarta-spring-boot-starter）接口文档
-#   RabbitMQ（spring-boot-starter-amqp）异步通知 / 延迟关单
 #   Redisson 分布式锁（下单防超卖）
-#   MinIO 对象存储（评价/商户图片上传）

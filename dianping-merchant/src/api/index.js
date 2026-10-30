@@ -73,5 +73,11 @@ export const api = {
   // 评价
   reviews: params => request(`/merchant/review/list?${params}`),
   replyReview: (id, content) => request(`/merchant/review/${id}/reply`, { method: 'POST', data: { content } }),
-  reviewReplies: id => request(`/merchant/review/${id}/replies`)
+  reviewReplies: id => request(`/merchant/review/${id}/replies`),
+  // 消息中心
+  messages: (current = 1, size = 20, isRead) =>
+    request(`/merchant/message/list?current=${current}&size=${size}${isRead !== undefined && isRead !== null ? `&isRead=${isRead}` : ''}`),
+  unreadMessages: () => request('/merchant/message/unread-count'),
+  readMessage: id => request(`/merchant/message/${id}/read`, { method: 'PUT' }),
+  readAllMessages: () => request('/merchant/message/read-all', { method: 'PUT' })
 }

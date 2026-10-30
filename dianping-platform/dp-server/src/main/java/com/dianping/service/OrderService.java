@@ -1,6 +1,7 @@
 package com.dianping.service;
 
 import com.dianping.dto.GroupbuyOrderDTO;
+import com.dianping.dto.PayNotifyDTO;
 import com.dianping.entity.GroupbuyOrder;
 import com.dianping.vo.OrderItemVO;
 
@@ -18,6 +19,11 @@ public interface OrderService {
      * 支付订单（骨架阶段为模拟支付，Phase 1 接入微信支付 V3）
      */
     Map<String, Object> pay(Long orderId);
+
+    /**
+     * 支付回调（幂等）：支付成功后订单流转为待使用并落支付流水
+     */
+    void payNotify(PayNotifyDTO dto);
 
     /**
      * 查询核销码

@@ -894,3 +894,10 @@ INSERT INTO `tb_groupbuy` (`shop_id`, `name`, `original_price`, `groupbuy_price`
 
 INSERT INTO `tb_groupbuy_rule` (`groupbuy_id`, `holiday_usable`, `per_user_limit`, `per_table_limit`, `refund_rule`) VALUES
 (1, 1, 3, 1, 1);
+
+-- 敏感词（1 低危打码 2 中危打码 3 高危拦截）
+INSERT INTO `tb_sensitive_word` (`word`, `level`) VALUES
+('赌博', 3),
+('代开发票', 3),
+('傻子', 1),
+('垃圾店', 2);

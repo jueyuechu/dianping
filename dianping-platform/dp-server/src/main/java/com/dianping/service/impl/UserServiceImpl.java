@@ -11,6 +11,7 @@ import com.dianping.entity.User;
 import com.dianping.mapper.UserMapper;
 import com.dianping.service.UserService;
 import com.dianping.service.TokenService;
+import com.dianping.service.UserBanService;
 import com.dianping.service.WeChatService;
 import com.dianping.vo.UserLoginVO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +35,9 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private TokenService tokenService;
 
+    @Autowired
+    private UserBanService userBanService;
+
     @Override
     public UserLoginVO login(UserLoginDTO userLoginDTO) {
         // 微信 code 换取 openid（mock 模式下为本地模拟，见 WeChatServiceImpl）
@@ -48,6 +52,9 @@ public class UserServiceImpl implements UserService {
             user.setStatus(StatusConstant.ENABLE);
             userMapper.insert(user);
         }
+
+        // 禁登录封禁校验
+        userBanService.assertAllowed(user.getId(), 1);
 
         Map<String, Object> claims = new HashMap<>();
         claims.put(JwtClaimsConstant.USER_ID, user.getId());

@@ -31,6 +31,11 @@ export const auditReject = (taskId, data) => request.post(`/admin/audit/${taskId
 export const reportList = params => request.get('/admin/report/list', { params })
 export const reportHandle = (id, result) => request.post(`/admin/report/${id}/handle`, null, { params: { result } })
 
+// ---- 退款审核 ----
+export const refundList = params => request.get('/admin/refund/list', { params })
+export const refundApprove = id => request.post(`/admin/refund/${id}/approve`)
+export const refundReject = (id, reason) => request.post(`/admin/refund/${id}/reject`, null, { params: { reason } })
+
 // ---- 内容管理 ----
 export const dishList = params => request.get('/admin/dish/list', { params })
 export const dishStatus = (id, status) => request.put(`/admin/dish/${id}/status`, null, { params: { status } })

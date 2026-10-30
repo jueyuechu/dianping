@@ -14,6 +14,8 @@ import com.dianping.mapper.ReviewImageMapper;
 import com.dianping.mapper.ReviewMapper;
 import com.dianping.mapper.ShopMapper;
 import com.dianping.service.ReviewService;
+import com.dianping.service.SensitiveWordService;
+import com.dianping.service.UserBanService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,6 +37,12 @@ public class ReviewServiceImpl implements ReviewService {
     @Autowired
     private ShopMapper shopMapper;
 
+    @Autowired
+    private UserBanService userBanService;
+
+    @Autowired
+    private SensitiveWordService sensitiveWordService;
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Review create(ReviewDTO dto) {
@@ -42,6 +50,9 @@ public class ReviewServiceImpl implements ReviewService {
         if (userId == null) {
             throw new BaseException(401, "未登录或登录已过期");
         }
+        // 禁评价封禁校验 + 敏感词过滤
+        userBanService.assertAllowed(userId, 2);
+        dto.setContent(sensitiveWordService.filter(dto.getContent()));
         // 消费凭证校验：订单属于当前用户，且已核销（状态 3）
         GroupbuyOrder order = groupbuyOrderMapper.selectById(dto.getOrderId());
         if (order == null || !order.getUserId().equals(userId)) {

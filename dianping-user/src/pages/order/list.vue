@@ -4,6 +4,8 @@
       <view class="tab" :class="{ on: active === 0 }" @click="switchTab(0)">全部</view>
       <view class="tab" :class="{ on: active === 2 }" @click="switchTab(2)">待使用</view>
       <view class="tab" :class="{ on: active === 3 }" @click="switchTab(3)">已使用</view>
+      <view class="tab" :class="{ on: active === 4 }" @click="switchTab(4)">已退款</view>
+      <view class="tab" :class="{ on: active === 5 }" @click="switchTab(5)">已过期</view>
     </view>
 
     <view v-if="!logged" class="login-card">
@@ -23,9 +25,12 @@
           <text class="order-amount">¥{{ o.amount }}</text>
         </view>
         <view class="order-actions">
-          <view v-if="o.status === 2" class="action-btn" @click.stop="goVerify(o)">出示核销码</view>
+          <view v-if="o.status === 2 && !activeRefund(o.id)" class="action-btn" @click.stop="goVerify(o)">出示核销码</view>
+          <view v-if="o.status === 2 && !activeRefund(o.id)" class="action-btn ghost" @click.stop="applyRefund(o)">申请退款</view>
+          <text v-if="o.status === 2 && activeRefund(o.id)" class="refund-tip">退款审核中</text>
           <view v-if="o.status === 3" class="action-btn ghost" @click.stop="goReview(o)">去评价</view>
         </view>
+        <text v-if="refundRejected(o.id)" class="refund-tip">退款申请已被驳回</text>
       </view>
       <view v-if="!orders.length" class="empty">暂无订单</view>
     </view>
@@ -41,6 +46,21 @@ import { isLogin, ORDER_STATUS } from '../../utils/auth'
 const logged = ref(false)
 const active = ref(0)
 const orders = ref([])
+const refunds = ref([])
+
+function refundOf(orderId) {
+  return refunds.value.find(r => r.orderId === orderId)
+}
+
+function activeRefund(orderId) {
+  const r = refundOf(orderId)
+  return r && [1, 2, 3].includes(r.status)
+}
+
+function refundRejected(orderId) {
+  const r = refundOf(orderId)
+  return r && r.status === 5
+}
 
 function statusText(s) {
   return ORDER_STATUS[s] || '未知'
@@ -54,8 +74,11 @@ async function load() {
   }
   try {
     orders.value = await api.orders(active.value || undefined)
+    const refundPage = await api.refunds()
+    refunds.value = refundPage.records || []
   } catch (e) {
     orders.value = []
+    refunds.value = []
   }
 }
 
@@ -82,6 +105,24 @@ function goReview(o) {
   uni.navigateTo({ url: `/pages/review/write?orderId=${o.id}&shopId=${o.shopId}` })
 }
 
+function applyRefund(o) {
+  uni.showModal({
+    title: '申请退款',
+    editable: true,
+    placeholderText: '请输入退款原因',
+    success: async res => {
+      if (!res.confirm) return
+      try {
+        await api.applyRefund({ orderId: o.id, reason: res.content || '用户申请退款' })
+        uni.showToast({ title: '退款申请已提交', icon: 'none' })
+        load()
+      } catch (e) {
+        // 请求封装已提示
+      }
+    }
+  })
+}
+
 onShow(load)
 </script>
 
@@ -106,5 +147,6 @@ onShow(load)
 .order-actions { display: flex; justify-content: flex-end; margin-top: 16rpx; }
 .action-btn { border: 1rpx solid #FFC300; color: #B07A00; font-size: 24rpx; padding: 10rpx 26rpx; border-radius: 30rpx; }
 .action-btn.ghost { border-color: #ddd; color: #666; }
+.refund-tip { font-size: 24rpx; color: #E6A800; }
 .empty { text-align: center; color: #999; font-size: 26rpx; padding: 100rpx 0; }
 </style>

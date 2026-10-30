@@ -4,6 +4,7 @@ import com.dianping.common.exception.BaseException;
 import com.dianping.service.FileStorageService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -21,6 +22,7 @@ import java.util.UUID;
  */
 @Slf4j
 @Service
+@ConditionalOnProperty(name = "dianping.upload.mode", havingValue = "local", matchIfMissing = true)
 public class LocalFileStorageServiceImpl implements FileStorageService {
 
     private static final Set<String> ALLOWED_EXT = Set.of("jpg", "jpeg", "png", "gif", "webp", "mp4");

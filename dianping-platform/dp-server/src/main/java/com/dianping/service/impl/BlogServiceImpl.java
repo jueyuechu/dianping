@@ -10,6 +10,8 @@ import com.dianping.dto.BlogDTO;
 import com.dianping.entity.*;
 import com.dianping.mapper.*;
 import com.dianping.service.BlogService;
+import com.dianping.service.SensitiveWordService;
+import com.dianping.service.UserBanService;
 import com.dianping.vo.BlogCommentVO;
 import com.dianping.vo.BlogVO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +38,12 @@ public class BlogServiceImpl implements BlogService {
     private FollowMapper followMapper;
 
     @Autowired
+    private UserBanService userBanService;
+
+    @Autowired
+    private SensitiveWordService sensitiveWordService;
+
+    @Autowired
     private UserMapper userMapper;
 
     @Autowired
@@ -56,8 +64,8 @@ public class BlogServiceImpl implements BlogService {
         blog.setUserId(userId);
         blog.setShopId(dto.getShopId());
         blog.setType(type);
-        blog.setTitle(dto.getTitle());
-        blog.setContent(dto.getContent());
+        blog.setTitle(sensitiveWordService.filter(dto.getTitle()));
+        blog.setContent(sensitiveWordService.filter(dto.getContent()));
         blog.setImages(join(dto.getImages()));
         blog.setLocation(dto.getLocation());
         // 帖子先发后审：发布即展示，敏感词与举报由审核环节处理
@@ -74,8 +82,8 @@ public class BlogServiceImpl implements BlogService {
         Blog blog = requireOwnBlog(id);
         blog.setShopId(dto.getShopId());
         blog.setType(dto.getType() == null ? blog.getType() : dto.getType());
-        blog.setTitle(dto.getTitle());
-        blog.setContent(dto.getContent());
+        blog.setTitle(sensitiveWordService.filter(dto.getTitle()));
+        blog.setContent(sensitiveWordService.filter(dto.getContent()));
         blog.setImages(join(dto.getImages()));
         blog.setLocation(dto.getLocation());
         blogMapper.updateById(blog);
@@ -198,6 +206,8 @@ public class BlogServiceImpl implements BlogService {
     @Transactional(rollbackFor = Exception.class)
     public BlogComment comment(Long blogId, BlogCommentDTO dto) {
         Long userId = currentUserId();
+        // 禁评论封禁校验 + 敏感词过滤
+        userBanService.assertAllowed(userId, 3);
         Blog blog = blogMapper.selectById(blogId);
         if (blog == null) {
             throw new BaseException(404, "帖子不存在");
@@ -207,7 +217,7 @@ public class BlogServiceImpl implements BlogService {
         comment.setUserId(userId);
         comment.setParentId(dto.getParentId());
         comment.setAnswerId(dto.getAnswerId());
-        comment.setContent(dto.getContent());
+        comment.setContent(sensitiveWordService.filter(dto.getContent()));
         comment.setStatus(0);
         blogCommentMapper.insert(comment);
 
